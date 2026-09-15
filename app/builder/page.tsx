@@ -12,7 +12,7 @@ export default function BuilderPage() {
   const { resume, updatePersonalInfo } = useResumeStore();
   const { personalInfo } = resume;
 
-  // Backend par data save karne ka function
+  
   const handleSaveResume = async () => {
     try {
       const response = await fetch("https://enhancv-replica.onrender.com/api/resume", {
@@ -130,7 +130,7 @@ export default function BuilderPage() {
   );
 }
 
-// Helper component tag cleanup if any
+
 function LiveProviderWrapper() {
   return null;
 }

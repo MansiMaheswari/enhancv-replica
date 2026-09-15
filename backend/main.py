@@ -12,7 +12,7 @@ supabase: Client = create_client(
 
 app = FastAPI()
 
-# CORS Middleware (Next.js frontend se connect karne ke liye)
+# CORS Middleware 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,7 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 1. Resume Data ke liye Pydantic Models (Structures)
+# 1. Resume Data 
 class PersonalInfo(BaseModel):
     fullName: Optional[str] = ""
     email: Optional[str] = ""
