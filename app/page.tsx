@@ -1,5 +1,5 @@
 'use client';
-
+export const dynamic = 'force-dynamic';
 import React from 'react';
 import { useResumeStore } from '@/store/useResumeStore';
 import { PersonalSection } from '@/components/editor/PersonalSection';
