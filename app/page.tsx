@@ -1,6 +1,7 @@
 'use client';
 export const dynamic = 'force-dynamic';
 import React from 'react';
+
 import { useResumeStore } from '@/store/useResumeStore';
 import { PersonalSection } from '@/components/editor/PersonalSection';
 import { SummarySection } from '@/components/editor/SummarySection';
@@ -12,8 +13,13 @@ import { ResumePreview } from '@/components/editor/ResumePreview';
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase client directly on the frontend
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://qjmansvgtylohrnhylor.supabase.co';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || 'sb_publishable_Y0syaP3jmDFCCVzlR8-fvg_i_AKbsaU';
+// Safe Supabase initialization with explicit validation
+const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseUrl = (rawUrl && rawUrl.startsWith('http')) ? rawUrl : 'https://qjmansvgtylohrnhylor.supabase.co';
+
+const rawKey = process.env.NEXT_PUBLIC_SUPABASE_KEY;
+const supabaseKey = (rawKey && rawKey.length > 5) ? rawKey : 'sb_publishable_Y0syaP3jmDFCCVzlR8-fvg_i_AKbsaU';
+
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default function Page() {
