@@ -4,49 +4,63 @@ import React from 'react';
 import { useResumeStore } from '@/store/useResumeStore';
 
 export function EducationSection() {
-  const { resume, addEducation, updateEducation, removeEducation } = useResumeStore();
-  const { education } = resume;
+  const { resumeData, addEducation, updateEducation, removeEducation, reorderEducation } = useResumeStore();
+  const { education } = resumeData;
 
   return (
-    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-700 mb-3">Education</h3>
+    <div className="space-y-4 p-4 border rounded-lg bg-white shadow-sm mb-6">
+      <h3 className="font-semibold text-lg text-gray-800">Education</h3>
       
-      {education.map((edu) => (
-        <div key={edu.id} className="bg-white p-4 rounded border border-gray-200 mb-4 space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">School / University</label>
-            <input 
-              type="text" 
-              placeholder="e.g. Vivekananda Global University" 
-              value={edu.school}
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
-              onChange={(e) => updateEducation(edu.id, 'school', e.target.value)}
-            />
+      {education.map((edu, index) => (
+        <div key={edu.id} className="border p-3 rounded-md space-y-2 bg-gray-50 relative">
+          {/* Reorder and Card Header Controls */}
+          <div className="flex justify-between items-center pb-1 border-b border-gray-200 mb-2">
+            <span className="text-xs font-semibold text-gray-500">Education #{index + 1}</span>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => reorderEducation(index, 'up')}
+                disabled={index === 0}
+                className="px-2 py-0.5 bg-gray-200 text-gray-700 text-xs rounded disabled:opacity-30 hover:bg-gray-300 transition cursor-pointer"
+                title="Move Up"
+              >
+                ▲ Up
+              </button>
+              <button
+                type="button"
+                onClick={() => reorderEducation(index, 'down')}
+                disabled={index === education.length - 1}
+                className="px-2 py-0.5 bg-gray-200 text-gray-700 text-xs rounded disabled:opacity-30 hover:bg-gray-300 transition cursor-pointer"
+                title="Move Down"
+              >
+                ▼ Down
+              </button>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Degree / Field of Study</label>
-            <input 
-              type="text" 
-              placeholder="e.g. MCA in AI and Data Science" 
-              value={edu.degree}
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
-              onChange={(e) => updateEducation(edu.id, 'degree', e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Year / Duration</label>
-            <input 
-              type="text" 
-              placeholder="e.g. 2024 - 2026" 
-              value={edu.year}
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
-              onChange={(e) => updateEducation(edu.id, 'year', e.target.value)}
-            />
-          </div>
+
+          <input
+            className="w-full border rounded px-3 py-1.5 text-sm bg-white"
+            placeholder="Degree (e.g. MCA, BBA)"
+            value={edu.degree}
+            onChange={(e) => updateEducation(edu.id, 'degree', e.target.value)}
+          />
+          <input
+            className="w-full border rounded px-3 py-1.5 text-sm bg-white"
+            placeholder="Institution / University Name"
+            value={edu.institution}
+            onChange={(e) => updateEducation(edu.id, 'institution', e.target.value)}
+          />
+          <input
+            className="w-full border rounded px-3 py-1.5 text-sm bg-white"
+            placeholder="Year (e.g. 2026)"
+            value={edu.year}
+            onChange={(e) => updateEducation(edu.id, 'year', e.target.value)}
+          />
+
           <button 
-            type="button" 
-            onClick={() => removeEducation(edu.id)}
-            className="text-red-500 text-sm font-medium hover:underline"
+            type="button"
+            onClick={() => removeEducation(edu.id)} 
+            className="text-red-500 text-xs font-medium hover:underline pt-1 block cursor-pointer"
           >
             Remove Education
           </button>
@@ -54,12 +68,16 @@ export function EducationSection() {
       ))}
 
       <button 
-        type="button" 
-        onClick={addEducation}
-        className="w-full py-2 bg-blue-50 text-blue-600 font-medium rounded border border-blue-200 hover:bg-blue-100 transition-colors"
+        type="button"
+        onClick={() => addEducation({ degree: '', institution: '', year: '' })} 
+        className="w-full py-2 bg-blue-50 text-blue-600 rounded-md text-sm font-medium hover:bg-blue-100 transition cursor-pointer"
       >
         + Add Education
       </button>
+
+      {education.length === 0 && (
+        <p className="text-gray-500 text-sm italic">No education added yet.</p>
+      )}
     </div>
   );
 }

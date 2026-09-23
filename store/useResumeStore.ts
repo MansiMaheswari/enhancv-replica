@@ -1,188 +1,214 @@
 import { create } from 'zustand';
-import { supabase } from '@/lib/supabaseClient'; // <-- Yeh line add karni hai
 
-export interface Experience {
-  id: string;
-  role: string;
-  company: string;
-  startDate: string;
-  endDate: string;
-}
-
-export interface Education {
-  id: string;
-  school: string;
-  degree: string;
-  year: string;
-}
-
-export interface Project {
-  id: string;
-  title: string;
-  description: string;
-}
-
-export interface ResumeState {
-  resume: {
-    personalInfo: {
-      fullName: string;
-      email: string;
-      phone: string;
-      location: string;
-    };
-    experience: Experience[];
-    education: Education[];
-    skills: string[];
-    projects: Project[];
+export interface ResumeData {
+  personalInfo: {
+    fullName: string;
+    jobTitle: string;
+    email: string;
+    phone: string;
+    location: string;
+    linkedin: string;
   };
+  summary: string;
+  experience: Array<{
+    id: string;
+    company: string;
+    position: string;
+    startDate: string;
+    endDate: string;
+    description: string;
+  }>;
+  education: Array<{
+    id: string;
+    degree: string;
+    institution: string;
+    year: string;
+  }>;
+  skills: string[];
+  projects: Array<{
+    id: string;
+    name: string;
+    description: string;
+    technologies: string[];
+  }>;
+  templateId: string;
+}
+
+interface ResumeState {
+  resumeData: ResumeData;
   updatePersonalInfo: (field: string, value: string) => void;
-  setExperience: (experience: Experience[]) => void;
-  addExperience: () => void;
+  updateSummary: (summary: string) => void;
+  
+  // Experience actions
+  addExperience: (exp: { company: string; position: string; startDate: string; endDate: string; description: string }) => void;
   updateExperience: (id: string, field: string, value: string) => void;
   removeExperience: (id: string) => void;
-  setEducation: (education: Education[]) => void;
-  addEducation: () => void;
+  reorderExperience: (index: number, direction: 'up' | 'down') => void;
+
+  // Education actions
+  addEducation: (edu: { degree: string; institution: string; year: string }) => void;
   updateEducation: (id: string, field: string, value: string) => void;
   removeEducation: (id: string) => void;
+  reorderEducation: (index: number, direction: 'up' | 'down') => void;
+
   setSkills: (skills: string[]) => void;
-  setProjects: (projects: Project[]) => void;
-  addProject: () => void;
-  updateProject: (id: string, field: string, value: string) => void;
+  
+  // Project actions
+  addProject: (project: { name: string; description: string; technologies: string[] }) => void;
+  updateProject: (id: string, field: string, value: any) => void;
   removeProject: (id: string) => void;
-  saveToDatabase: () => Promise<void>; // <-- Yeh naya function declare kiya
+  reorderProjects: (index: number, direction: 'up' | 'down') => void;
+
+  setTemplate: (templateId: string) => void;
 }
 
-export const useResumeStore = create<ResumeState>((set, get) => ({
-  resume: {
+export const useResumeStore = create<ResumeState>((set) => ({
+  resumeData: {
     personalInfo: {
       fullName: '',
+      jobTitle: '',
       email: '',
       phone: '',
       location: '',
+      linkedin: '',
     },
+    summary: '',
     experience: [],
     education: [],
     skills: [],
     projects: [],
+    templateId: 'modern',
   },
   updatePersonalInfo: (field, value) =>
     set((state) => ({
-      resume: {
-        ...state.resume,
+      resumeData: {
+        ...state.resumeData,
         personalInfo: {
-          ...state.resume.personalInfo,
+          ...state.resumeData.personalInfo,
           [field]: value,
         },
       },
     })),
-  setExperience: (experience) =>
+  updateSummary: (summary) =>
     set((state) => ({
-      resume: { ...state.resume, experience },
+      resumeData: { ...state.resumeData, summary },
     })),
-  addExperience: () =>
+
+  addExperience: (exp) =>
     set((state) => ({
-      resume: {
-        ...state.resume,
-        experience: [
-          ...state.resume.experience,
-          { id: Date.now().toString(), role: '', company: '', startDate: '', endDate: '' },
-        ],
+      resumeData: {
+        ...state.resumeData,
+        experience: [...state.resumeData.experience, { ...exp, id: Date.now().toString() }],
       },
     })),
   updateExperience: (id, field, value) =>
     set((state) => ({
-      resume: {
-        ...state.resume,
-        experience: state.resume.experience.map((exp) =>
-          exp.id === id ? { ...exp, [field]: value } : exp
+      resumeData: {
+        ...state.resumeData,
+        experience: state.resumeData.experience.map((item) =>
+          item.id === id ? { ...item, [field]: value } : item
         ),
       },
     })),
   removeExperience: (id) =>
     set((state) => ({
-      resume: {
-        ...state.resume,
-        experience: state.resume.experience.filter((exp) => exp.id !== id),
+      resumeData: {
+        ...state.resumeData,
+        experience: state.resumeData.experience.filter((item) => item.id !== id),
       },
     })),
-  setEducation: (education) =>
+  reorderExperience: (index, direction) =>
+    set((state) => {
+      const list = [...state.resumeData.experience];
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= list.length) return state;
+      const temp = list[index];
+      list[index] = list[targetIndex];
+      list[targetIndex] = temp;
+      return {
+        resumeData: { ...state.resumeData, experience: list },
+      };
+    }),
+
+  addEducation: (edu) =>
     set((state) => ({
-      resume: { ...state.resume, education },
-    })),
-  addEducation: () =>
-    set((state) => ({
-      resume: {
-        ...state.resume,
-        education: [
-          ...state.resume.education,
-          { id: Date.now().toString(), school: '', degree: '', year: '' },
-        ],
+      resumeData: {
+        ...state.resumeData,
+        education: [...state.resumeData.education, { ...edu, id: Date.now().toString() }],
       },
     })),
   updateEducation: (id, field, value) =>
     set((state) => ({
-      resume: {
-        ...state.resume,
-        education: state.resume.education.map((edu) =>
-          edu.id === id ? { ...edu, [field]: value } : edu
+      resumeData: {
+        ...state.resumeData,
+        education: state.resumeData.education.map((item) =>
+          item.id === id ? { ...item, [field]: value } : item
         ),
       },
     })),
   removeEducation: (id) =>
     set((state) => ({
-      resume: {
-        ...state.resume,
-        education: state.resume.education.filter((edu) => edu.id !== id),
+      resumeData: {
+        ...state.resumeData,
+        education: state.resumeData.education.filter((item) => item.id !== id),
       },
     })),
+  reorderEducation: (index, direction) =>
+    set((state) => {
+      const list = [...state.resumeData.education];
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= list.length) return state;
+      const temp = list[index];
+      list[index] = list[targetIndex];
+      list[targetIndex] = temp;
+      return {
+        resumeData: { ...state.resumeData, education: list },
+      };
+    }),
+
   setSkills: (skills) =>
     set((state) => ({
-      resume: { ...state.resume, skills },
+      resumeData: { ...state.resumeData, skills },
     })),
-  setProjects: (projects) =>
+
+  addProject: (proj) =>
     set((state) => ({
-      resume: { ...state.resume, projects },
-    })),
-  addProject: () =>
-    set((state) => ({
-      resume: {
-        ...state.resume,
-        projects: [
-          ...state.resume.projects,
-          { id: Date.now().toString(), title: '', description: '' },
-        ],
+      resumeData: {
+        ...state.resumeData,
+        projects: [...state.resumeData.projects, { ...proj, id: Date.now().toString() }],
       },
     })),
   updateProject: (id, field, value) =>
     set((state) => ({
-      resume: {
-        ...state.resume,
-        projects: state.resume.projects.map((proj) =>
-          proj.id === id ? { ...proj, [field]: value } : proj
+      resumeData: {
+        ...state.resumeData,
+        projects: state.resumeData.projects.map((item) =>
+          item.id === id ? { ...item, [field]: value } : item
         ),
       },
     })),
   removeProject: (id) =>
     set((state) => ({
-      resume: {
-        ...state.resume,
-        projects: state.resume.projects.filter((proj) => proj.id !== id),
+      resumeData: {
+        ...state.resumeData,
+        projects: state.resumeData.projects.filter((item) => item.id !== id),
       },
     })),
+  reorderProjects: (index, direction) =>
+    set((state) => {
+      const list = [...state.resumeData.projects];
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= list.length) return state;
+      const temp = list[index];
+      list[index] = list[targetIndex];
+      list[targetIndex] = temp;
+      return {
+        resumeData: { ...state.resumeData, projects: list },
+      };
+    }),
 
-  // --- Yeh naya function data ko Supabase mein save karega ---
-  saveToDatabase: async () => {
-    const currentState = get();
-    const { data, error } = await supabase
-      .from('resumes')
-      .insert([{ full_data: currentState.resume }]);
-
-    if (error) {
-      console.error('Supabase Error:', error.message);
-      alert('Error saving resume to database!');
-    } else {
-      console.log('Saved successfully:', data);
-      alert('Resume saved to Supabase successfully!');
-    }
-  },
+  setTemplate: (templateId) =>
+    set((state) => ({
+      resumeData: { ...state.resumeData, templateId },
+    })),
 }));

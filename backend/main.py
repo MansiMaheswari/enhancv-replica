@@ -1,18 +1,15 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Any, Dict
+import os
+from dotenv import load_dotenv
 from supabase import create_client, Client
 
-# Supabase Client
-supabase: Client = create_client(
-    supabase_url="https://qjmansvgtylohrnhylor.supabase.co",
-    supabase_key="sb_publishable_Y0syaP3jmDFCCVzlR8-fvg_i_AKbsaU"
-)
+load_dotenv()
 
 app = FastAPI()
 
-# CORS Middleware 
+# 1. CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,60 +18,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 1. Resume Data 
-class PersonalInfo(BaseModel):
-    fullName: Optional[str] = ""
-    email: Optional[str] = ""
-    phone: Optional[str] = ""
-    location: Optional[str] = ""
+# Configure Supabase Client
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-class Education(BaseModel):
-    id: str
-    school: Optional[str] = ""
-    degree: Optional[str] = ""
-    year: Optional[str] = ""
-
-class Experience(BaseModel):
-    id: str
-    role: Optional[str] = ""
-    company: Optional[str] = ""
-    startDate: Optional[str] = ""
-    endDate: Optional[str] = ""
-
-class Project(BaseModel):
-    id: str
-    title: Optional[str] = ""
-    description: Optional[str] = ""
-
-class ResumeData(BaseModel):
-    personalInfo: PersonalInfo
-    education: List[Education] = []
-    experience: List[Experience] = []
-    skills: List[str] = []
-    projects: List[Project] = []
-
-
-# 2. Root Get API
-@app.get("/")
-def read_root():
-    return {"message": "Resume Builder Backend is running successfully! 🚀"}
-
-
-# 3. Save Resume POST API
+# Resume Data Save Route
 @app.post("/api/resume")
-def save_resume(resume: ResumeData):
-   
-    print("Received Resume Data:", resume)
-
+async def save_resume(data: Dict[str, Any]):
     try:
-    
-        response = supabase.table("resumes").insert({"full_data": resume.dict()}).execute()
-        print("Data inserted into Supabase successfully:", response)
+        response = supabase.table("resumes").insert({"full_data": data}).execute()
+        return {"status": "success", "message": "Resume saved successfully to Supabase database!"}
     except Exception as e:
-        print("Error saving to Supabase:", str(e))
-    
-    return {
-        "status": "success",
-        "message": "Resume data saved successfully!",
-        "data": resume
-    }
+        print("Supabase Error:", str(e))
+        raise HTTPException(status_code=500, detail=str(e))
