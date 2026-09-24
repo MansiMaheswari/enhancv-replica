@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = 'force-dynamic';
 
 import React from 'react';
 import { ExperienceSection } from '@/components/editor/ExperienceSection';
@@ -9,22 +10,21 @@ import { LivePreview } from '@/components/preview/LivePreview';
 import { useResumeStore } from '@/store/useResumeStore';
 
 export default function BuilderPage() {
-  const { resume, updatePersonalInfo } = useResumeStore();
-  const { personalInfo } = resume;
+  const { resumeData, updatePersonalInfo } = useResumeStore();
+  // Safe fallback to prevent undefined destructuring error during build
+  const personalInfo = resumeData?.personalInfo || {};
 
-  
   const handleSaveResume = async () => {
     try {
       const response = await fetch("https://enhancv-replica.onrender.com/api/resume", {
-      
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          personalInfo: resume.personalInfo,
-          education: resume.education,
-          experience: resume.experience,
-          skills: resume.skills,
-          projects: resume.projects,
+          personalInfo: resumeData?.personalInfo || {},
+          education: resumeData?.education || [],
+          experience: resumeData?.experience || [],
+          skills: resumeData?.skills || [],
+          projects: resumeData?.projects || [],
         }),
       });
 
@@ -129,7 +129,6 @@ export default function BuilderPage() {
     </div>
   );
 }
-
 
 function LiveProviderWrapper() {
   return null;
