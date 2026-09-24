@@ -1,7 +1,7 @@
 import { useResumeStore } from '@/store/useResumeStore';
 
 export function LivePreview() {
-  const resume = useResumeStore((state) => state.resume);
+  const resume = useResumeStore((state) => state.resumeData) || {};
 
   return (
     <div className="space-y-4">
@@ -20,10 +20,10 @@ export function LivePreview() {
         {/* Header / Personal Info */}
         <div className="border-b pb-4 mb-4">
           <h1 className="text-2xl font-bold text-gray-900">
-            {resume.personalInfo.fullName || 'Your Full Name'}
+            {resume?.personalInfo?.fullName || 'Your Full Name'}
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            {resume.personalInfo.email || 'email@example.com'} &bull; {resume.personalInfo.phone || 'Phone Number'} &bull; {resume.personalInfo.location || 'Location'}
+            {resume?.personalInfo?.email || 'email@example.com'} &bull; {resume?.personalInfo?.phone || 'Phone Number'} &bull; {resume?.personalInfo?.location || 'Location'}
           </p>
         </div>
 
@@ -32,10 +32,10 @@ export function LivePreview() {
           <h2 className="text-sm font-bold uppercase tracking-wider text-blue-600 border-b pb-1 mb-3">
             Education
           </h2>
-          {resume.education.length === 0 ? (
+          {(!resume?.education || resume.education.length === 0) ? (
             <p className="text-sm text-gray-400 italic">Education details will appear here...</p>
           ) : (
-            resume.education.map((edu) => (
+            resume.education.map((edu: any) => (
               <div key={edu.id} className="mb-4">
                 <div className="flex justify-between items-baseline">
                   <h3 className="font-semibold text-gray-800 text-sm">
@@ -56,10 +56,10 @@ export function LivePreview() {
           <h2 className="text-sm font-bold uppercase tracking-wider text-blue-600 border-b pb-1 mb-3">
             Experience
           </h2>
-          {resume.experience.length === 0 ? (
+          {(!resume?.experience || resume.experience.length === 0) ? (
             <p className="text-sm text-gray-400 italic">Experience details will appear here...</p>
           ) : (
-            resume.experience.map((exp) => (
+            resume.experience.map((exp: any) => (
               <div key={exp.id} className="mb-4">
                 <div className="flex justify-between items-baseline">
                   <h3 className="font-semibold text-gray-800 text-sm">
@@ -80,12 +80,12 @@ export function LivePreview() {
           <h2 className="text-sm font-bold uppercase tracking-wider text-blue-600 border-b pb-1 mb-3">
             Skills
           </h2>
-          {resume.skills.length === 0 ? (
+          {(!resume?.skills || resume.skills.length === 0) ? (
             <p className="text-sm text-gray-400 italic">Skills will appear here...</p>
           ) : (
             <div className="flex flex-wrap gap-2">
-              {resume.skills.map((skill) => (
-                <span key={skill} className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded border">
+              {resume.skills.map((skill: string, index: number) => (
+                <span key={index} className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded border">
                   {skill}
                 </span>
               ))}
@@ -98,10 +98,10 @@ export function LivePreview() {
           <h2 className="text-sm font-bold uppercase tracking-wider text-blue-600 border-b pb-1 mb-3">
             Projects
           </h2>
-          {resume.projects.length === 0 ? (
+          {(!resume?.projects || resume.projects.length === 0) ? (
             <p className="text-sm text-gray-400 italic">Projects will appear here...</p>
           ) : (
-            resume.projects.map((proj) => (
+            resume.projects.map((proj: any) => (
               <div key={proj.id} className="mb-4">
                 <h3 className="font-semibold text-gray-800 text-sm">
                   {proj.title || 'Project Title'}
