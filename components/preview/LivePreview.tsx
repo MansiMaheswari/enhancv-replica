@@ -3,6 +3,14 @@ import { useResumeStore } from '@/store/useResumeStore';
 export function LivePreview() {
   const resume = useResumeStore((state) => state.resumeData) || {};
 
+  const getBullets = (text: string) => {
+    if (!text) return [];
+    return text
+      .split(/•|\r?\n/)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+  };
+
   return (
     <div className="space-y-4">
       {/* Download Button */}
@@ -45,7 +53,7 @@ export function LivePreview() {
                     {edu.year || 'Year'}
                   </span>
                 </div>
-                <p className="text-xs font-medium text-gray-600">{edu.school || 'School / University'}</p>
+                <p className="text-xs font-medium text-gray-600">{edu.institution || 'School / University'}</p>
               </div>
             ))
           )}
@@ -63,13 +71,24 @@ export function LivePreview() {
               <div key={exp.id} className="mb-4">
                 <div className="flex justify-between items-baseline">
                   <h3 className="font-semibold text-gray-800 text-sm">
-                    {exp.role || 'Job Title'}
+                    {exp.position || 'Job Title'}
                   </h3>
                   <span className="text-xs text-gray-500">
                     {exp.startDate} {exp.startDate && exp.endDate ? '-' : ''} {exp.endDate}
                   </span>
                 </div>
                 <p className="text-xs font-medium text-gray-600">{exp.company || 'Company Name'}</p>
+                
+                {exp.description && (
+                  <div className="mt-2 space-y-1.5 text-xs text-gray-600">
+                    {getBullets(exp.description).map((line, idx) => (
+                      <div key={idx} className="flex items-start gap-1.5 w-full">
+                        <span className="select-none flex-shrink-0 text-gray-800">•</span>
+                        <span className="flex-1 leading-relaxed">{line}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))
           )}
@@ -103,12 +122,42 @@ export function LivePreview() {
           ) : (
             resume.projects.map((proj: any) => (
               <div key={proj.id} className="mb-4">
-                <h3 className="font-semibold text-gray-800 text-sm">
-                  {proj.title || 'Project Title'}
-                </h3>
-                <p className="text-xs text-gray-600 mt-1 whitespace-pre-line">
-                  {proj.description || 'Project description...'}
-                </p>
+                <div className="flex justify-between items-baseline">
+                  <h3 className="font-semibold text-gray-800 text-sm">
+                    {proj.name || 'Project Title'}
+                  </h3>
+                  {proj.link && (
+                    <a href={proj.link} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline">
+                      Link
+                    </a>
+                  )}
+                </div>
+
+                {/* Multiple Technologies Stack Tags */}
+                {proj.technologies && (
+                  <div className="flex flex-wrap gap-1.5 my-1.5">
+                    {proj.technologies
+                      .split(/[,]+/)
+                      .map((t: string) => t.trim())
+                      .filter((t: string) => t.length > 0)
+                      .map((tech: string, i: number) => (
+                        <span key={i} className="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200 font-medium">
+                          {tech}
+                        </span>
+                      ))}
+                  </div>
+                )}
+
+                {proj.description && (
+                  <div className="mt-1.5 space-y-1.5 text-xs text-gray-600">
+                    {getBullets(proj.description).map((line, idx) => (
+                      <div key={idx} className="flex items-start gap-1.5 w-full">
+                        <span className="select-none flex-shrink-0 text-gray-800">•</span>
+                        <span className="flex-1 leading-relaxed">{line}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))
           )}

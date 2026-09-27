@@ -36,7 +36,7 @@ export function ResumePreview() {
 
       {/* Render Selected Template */}
       {templateId === 'classic' ? (
-        // --- CLASSIC TEMPLATE (Left-aligned, formal layout) ---
+        // --- CLASSIC TEMPLATE ---
         <div className="bg-white p-8 shadow-lg rounded-xl border border-gray-200 max-w-2xl mx-auto text-gray-900 font-serif min-h-[800px]">
           {/* Header */}
           <div className="border-b-2 border-gray-900 pb-3 mb-6">
@@ -77,7 +77,20 @@ export function ResumePreview() {
                       <span>{exp.position} - {exp.company}</span>
                       <span className="text-xs text-gray-600">{exp.startDate} to {exp.endDate}</span>
                     </div>
-                    {exp.description && <p className="text-xs mt-1 leading-normal">{exp.description}</p>}
+                    {exp.description && (
+                      <div className="text-xs mt-1 space-y-1">
+                        {exp.description.split('\n').map((line, idx) => {
+                          const trimmed = line.trim();
+                          if (!trimmed) return null;
+                          return (
+                            <div key={idx} className="flex items-start">
+                              <span className="mr-1.5 text-gray-500">•</span>
+                              <span>{trimmed.replace(/^[•\-\*]\s*/, '')}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -113,7 +126,7 @@ export function ResumePreview() {
             </div>
           )}
 
-          {/* Projects (Classic Template) */}
+          {/* Projects */}
           {projects.length > 0 && (
             <div>
               <h2 className="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-400 pb-1 mb-2">
@@ -123,10 +136,23 @@ export function ResumePreview() {
                 {projects.map((proj) => (
                   <div key={proj.id}>
                     <h3 className="font-semibold text-sm">{proj.name}</h3>
-                    {proj.description && <p className="text-xs mt-0.5">{proj.description}</p>}
-                    {proj.technologies && proj.technologies.length > 0 && proj.technologies[0] !== '' && (
-                      <p className="text-xs text-gray-600 italic mt-0.5">
-                        Technologies: {Array.isArray(proj.technologies) ? proj.technologies.join(', ') : proj.technologies}
+                    {proj.description && (
+                      <div className="text-xs mt-0.5 space-y-1">
+                        {proj.description.split('\n').map((line, idx) => {
+                          const trimmed = line.trim();
+                          if (!trimmed) return null;
+                          return (
+                            <div key={idx} className="flex items-start">
+                              <span className="mr-1.5 text-gray-500">•</span>
+                              <span>{trimmed.replace(/^[•\-\*]\s*/, '')}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {proj.technologies && (
+                      <p className="text-xs text-gray-600 italic mt-1">
+                        Technologies: {(Array.isArray(proj.technologies) ? proj.technologies : String(proj.technologies).split(',')).map(t => t.trim()).filter(Boolean).join(', ')}
                       </p>
                     )}
                   </div>
@@ -134,11 +160,9 @@ export function ResumePreview() {
               </div>
             </div>
           )}
-
-         
         </div>
       ) : (
-        // --- MODERN TEMPLATE (Centered header, colored badges) ---
+        // --- MODERN TEMPLATE ---
         <div className="bg-white p-8 shadow-lg rounded-xl border border-gray-200 max-w-2xl mx-auto text-gray-800 font-sans min-h-[800px]">
           <div className="text-center border-b pb-4 mb-6">
             <h1 className="text-3xl font-bold text-gray-900">
@@ -179,7 +203,20 @@ export function ResumePreview() {
                       </span>
                     </div>
                     <p className="text-sm font-medium text-blue-600">{exp.company || 'Company Name'}</p>
-                    {exp.description && <p className="text-sm text-gray-700 mt-1">{exp.description}</p>}
+                    {exp.description && (
+                      <div className="text-sm text-gray-700 mt-1 space-y-1">
+                        {exp.description.split('\n').map((line, idx) => {
+                          const trimmed = line.trim();
+                          if (!trimmed) return null;
+                          return (
+                            <div key={idx} className="flex items-start">
+                              <span className="mr-1.5 text-gray-500">•</span>
+                              <span>{trimmed.replace(/^[•\-\*]\s*/, '')}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -232,11 +269,38 @@ export function ResumePreview() {
                 {projects.map((proj) => (
                   <div key={proj.id}>
                     <h3 className="font-semibold text-gray-900">{proj.name || 'Project Name'}</h3>
-                    {proj.description && <p className="text-sm text-gray-700 mt-0.5">{proj.description}</p>}
-                    {proj.technologies && proj.technologies.length > 0 && proj.technologies[0] !== '' && (
-                      <p className="text-xs text-blue-600 mt-1">
-                        Tech: {Array.isArray(proj.technologies) ? proj.technologies.join(', ') : proj.technologies}
-                      </p>
+                    {proj.description && (
+                      <div className="text-sm text-gray-700 mt-0.5 space-y-1">
+                        {proj.description.split('\n').map((line, idx) => {
+                          const trimmed = line.trim();
+                          if (!trimmed) return null;
+                          return (
+                            <div key={idx} className="flex items-start">
+                              <span className="mr-1.5 text-gray-500">•</span>
+                              <span>{trimmed.replace(/^[•\-\*]\s*/, '')}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {proj.technologies && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {(Array.isArray(proj.technologies) 
+                          ? proj.technologies 
+                          : String(proj.technologies).split(',')
+                        )
+                          .flatMap((item: string) => item.split(','))
+                          .map((tech: string) => tech.trim())
+                          .filter((tech: string) => tech.length > 0)
+                          .map((tech: string, i: number) => (
+                            <span 
+                              key={i} 
+                              className="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200 font-medium"
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                      </div>
                     )}
                   </div>
                 ))}
