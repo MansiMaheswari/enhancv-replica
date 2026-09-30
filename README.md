@@ -1,36 +1,26 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Resume Builder
 
-## Getting Started
+A full-stack, production-ready AI Resume Builder web application inspired by Enhancv, built with Next.js, Tailwind CSS, and Supabase. It features a modern split-screen layout with a real-time live preview and multiple customizable templates.
 
-First, run the development server:
+## 🚀 Live Demo
+- **Live Application:** [View Live App](https://enhancv-replica-9expfv4kw-enhancv-replica.vercel.app)
+- **GitHub Repository:** [View Source Code](https://github.com/MansiMaheswari/enhancv-replica)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🛠️ Tech Stack
+- **Frontend:** Next.js (App Router), React, Tailwind CSS
+- **Backend & Database:** Supabase (PostgreSQL)
+- **Deployment:** Vercel
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Key Features
+- **Split-Screen Editor:** Real-time synchronization between the form inputs on the left and the live resume preview on the right.
+- **Multiple Templates:** Switch dynamically between 5 distinct professional resume templates (Modern, Classic, Minimalist, Professional, Compact).
+- **Cloud Persistence:** Securely save and load resume data using Supabase database integration.
+- **Responsive Design:** Fully responsive layout optimized for desktop and mobile devices.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Getting Started Locally
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+To run this project on your local machine, follow these steps:
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/MansiMaheswari/enhancv-replica.git](https://github.com/MansiMaheswari/enhancv-replica.git)
