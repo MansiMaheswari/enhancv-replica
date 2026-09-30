@@ -1,5 +1,23 @@
 import { create } from 'zustand';
 
+// Week 7: Template IDs definition
+export type TemplateId = 'modern' | 'classic' | 'minimalist' | 'professional' | 'compact';
+
+export interface TemplateConfig {
+  id: TemplateId;
+  name: string;
+  description: string;
+}
+
+// Available Templates List for Selector UI
+export const AVAILABLE_TEMPLATES: TemplateConfig[] = [
+  { id: 'modern', name: 'Modern Sidebar', description: 'Clean 2-column layout with a styled sidebar' },
+  { id: 'classic', name: 'Classic Corporate', description: 'Traditional single-column layout suitable for conservative roles' },
+  { id: 'minimalist', name: 'Clean Minimalist', description: 'Typography-focused layout with light accents' },
+  { id: 'professional', name: 'Professional', description: 'Elegant layout with a focus on content hierarchy' },
+  { id: 'compact', name: 'Compact Layout', description: 'Space-efficient design ideal for concise information presentation' }
+];
+
 export interface ResumeData {
   personalInfo: {
     fullName: string;
@@ -31,7 +49,7 @@ export interface ResumeData {
     description: string;
     technologies: string[];
   }>;
-  templateId: string;
+  templateId: TemplateId;
 }
 
 interface ResumeState {
@@ -59,7 +77,8 @@ interface ResumeState {
   removeProject: (id: string) => void;
   reorderProjects: (index: number, direction: 'up' | 'down') => void;
 
-  setTemplate: (templateId: string) => void;
+  // Template action
+  setTemplate: (templateId: TemplateId) => void;
 }
 
 export const useResumeStore = create<ResumeState>((set) => ({

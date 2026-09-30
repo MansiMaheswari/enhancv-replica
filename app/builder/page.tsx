@@ -1,6 +1,7 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
+
 import React from 'react';
 import { ExperienceSection } from '@/components/editor/ExperienceSection';
 import { EducationSection } from '@/components/editor/EducationSection';
@@ -25,6 +26,7 @@ export default function BuilderPage() {
           experience: resumeData?.experience || [],
           skills: resumeData?.skills || [],
           projects: resumeData?.projects || [],
+          templateId: resumeData?.templateId || 'modern', // Saved active template ID
         }),
       });
 
