@@ -7,7 +7,6 @@ import { ExperienceSection } from '@/components/editor/ExperienceSection';
 import { EducationSection } from '@/components/editor/EducationSection';
 import { SkillsSection } from '@/components/editor/SkillsSection';
 import { ProjectsSection } from '@/components/editor/ProjectSection';
-// Agar aapne PersonalInfoSection alag banaya hai to import karein, warna niche form rakhein
 import { supabase } from '@/lib/supabaseClient';
 
 export default function HomePage() {
@@ -18,12 +17,11 @@ export default function HomePage() {
 
   const handleSaveResume = async () => {
     try {
-      const {data, error } = await supabase
+      const { data, error } = await supabase
         .from('resumes')
         .insert([
           { 
             full_data: resumeData,
-           
           }
         ]);
 
@@ -41,8 +39,8 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-6">
-      {/* Header Bar */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 max-w-7xl mx-auto gap-4">
+      {/* Header Bar - print:hidden se header bhi print me nahi aayega */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 max-w-7xl mx-auto gap-4 print:hidden">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Resume Editor v1</h1>
           <p className="text-sm text-gray-500">Fill out your details to generate your professional resume.</p>
@@ -66,8 +64,8 @@ export default function HomePage() {
       {/* Main Grid - Responsive for Mobile & Desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-7xl mx-auto">
         
-        {/* Left Side: Editor Sections */}
-        <div className="col-span-12 lg:col-span-6 space-y-6">
+        {/* Left Side: Editor Sections - Added print:hidden here */}
+        <div className="col-span-12 lg:col-span-6 space-y-6 print:hidden">
           {/* Personal Info */}
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">Personal Information</h2>
@@ -154,10 +152,10 @@ export default function HomePage() {
           <ProjectsSection />
         </div>
 
-        {/* Right Side: Live Preview */}
-        <div className="col-span-12 lg:col-span-6 space-y-4">
+        {/* Right Side: Live Preview - Yeh print me full width aur clean aayega */}
+        <div className="col-span-12 lg:col-span-6 space-y-4 w-full lg:w-auto">
           <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm lg:sticky lg:top-6">
-            <div className="flex justify-between items-center mb-4 border-b pb-3 flex-wrap gap-2">
+            <div className="flex justify-between items-center mb-4 border-b pb-3 flex-wrap gap-2 print:hidden">
               <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
                 LIVE PREVIEW
               </span>
@@ -180,7 +178,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="min-h-[600px] border rounded-lg p-4 bg-white shadow-inner overflow-auto">
+            <div className="min-h-[600px] border-0 lg:border rounded-lg p-0 lg:p-4 bg-white shadow-none lg:shadow-inner overflow-auto">
               <LivePreview />
             </div>
           </div>
