@@ -1,441 +1,390 @@
 'use client';
 
 import React from 'react';
-import { useResumeStore } from '@/store/useResumeStore';
+import { useResumeStore, AVAILABLE_TEMPLATES } from '@/store/useResumeStore';
 
 export function LivePreview() {
-  const { resumeData } = useResumeStore();
+  const { resumeData, setTemplate } = useResumeStore();
   const personalInfo = resumeData?.personalInfo || {};
   const summary = resumeData?.summary || '';
   const education = resumeData?.education || [];
   const experience = resumeData?.experience || [];
-  const projects = resumeData?.projects || [];
   const skills = resumeData?.skills || [];
+  const projects = resumeData?.projects || [];
   const templateId = resumeData?.templateId || 'modern';
 
-  // Helper to parse tech stack
-  const parseTechnologies = (techs: any): string[] => {
-    if (!techs) return [];
-    if (Array.isArray(techs)) {
-      return techs.flatMap((t) => (typeof t === 'string' ? t.split(',').map((item) => item.trim()) : t)).filter(Boolean);
+  // Helper to format dates nicely
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    const parts = dateStr.split(/[\/\-]/);
+    if (parts.length === 3) {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      let monthIndex = parseInt(parts[1], 10) - 1;
+      if (monthIndex >= 0 && monthIndex < 12) {
+        return `${months[monthIndex]} ${parts[2] || parts[0]}`;
+      }
     }
-    if (typeof techs === 'string') {
-      return techs
-        .split(/[,]+/)
-        .map((t) => t.trim())
-        .filter((t) => t.length > 0);
-    }
-    return [];
+    return dateStr;
   };
 
-  // Helper to render bullet points
-  const renderBullets = (text: string) => {
+  // Helper function to render descriptions as bullet points
+  const renderBulletPoints = (text: string) => {
     if (!text) return null;
-    const lines = text.split('\n').filter((line) => line.trim().length > 0);
+    const lines = text.split('\n').filter((line) => line.trim() !== '');
     if (lines.length <= 1) {
-      return <p className="text-xs text-gray-700 mt-1">{text}</p>;
+      return <p className="text-gray-600 mt-0.5">{text}</p>;
     }
     return (
-      <ul className="list-disc list-inside text-xs text-gray-700 mt-1 space-y-0.5">
+      <ul className="list-disc list-inside space-y-0.5 text-gray-600 mt-0.5">
         {lines.map((line, idx) => (
-          <li key={idx} className="leading-relaxed">
-            {line.replace(/^[•\-\*]\s*/, '')}
-          </li>
+          <li key={idx}>{line.replace(/^[•\-\*]\s*/, '')}</li>
         ))}
       </ul>
     );
   };
 
-  // Render Skills Helper
-  const renderSkillsList = (isSerif = false) => {
-    if (skills.length === 0) {
-      return <p className={`text-xs text-gray-400 italic ${isSerif ? 'font-serif' : ''}`}>Skills will appear here...</p>;
-    }
-    return (
-      <div className="flex flex-wrap gap-1.5">
-        {skills.map((skill: any, idx: number) => (
-          <span key={idx} className={`px-2 py-0.5 text-xs rounded border ${isSerif ? 'bg-gray-100 text-gray-800 border-gray-300 font-serif' : 'bg-blue-50 text-blue-700 border-blue-100'}`}>
-            {typeof skill === 'string' ? skill : skill.name}
-          </span>
-        ))}
-      </div>
-    );
-  };
-
-  // Render Project Technologies Helper
-  const renderProjectTech = (techs: any, isSerif = false) => {
-    const techList = parseTechnologies(techs);
-    if (techList.length === 0) return null;
-    return (
-      <div className="flex flex-wrap gap-1.5 mt-1.5">
-        {techList.map((tech, i) => (
-          <span key={i} className={`px-2 py-0.5 text-[11px] rounded border ${isSerif ? 'bg-gray-50 text-gray-700 border-gray-300 font-serif' : 'bg-gray-100 text-gray-700 border-gray-200'}`}>
-            {tech}
-          </span>
-        ))}
-      </div>
-    );
-  };
-
-  // 1. Modern Template
-  const renderModernTemplate = () => (
-    <div className="space-y-4 text-sm text-gray-800 font-sans">
-      <div className="text-center border-b pb-3">
-        <h1 className="text-2xl font-bold text-gray-900">{personalInfo.fullName || 'Your Full Name'}</h1>
-        <p className="text-xs font-medium text-blue-600 mt-0.5">{personalInfo.jobTitle || 'Job Title'}</p>
-        <div className="flex justify-center gap-3 text-xs text-gray-500 mt-2 flex-wrap">
-          {personalInfo.email && <span>{personalInfo.email}</span>}
-          {personalInfo.phone && <span>• {personalInfo.phone}</span>}
-          {personalInfo.location && <span>• {personalInfo.location}</span>}
-          {personalInfo.linkedin && <span>• {personalInfo.linkedin}</span>}
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b pb-1 mb-2">Summary</h3>
-        {summary ? <p className="text-xs text-gray-700 leading-relaxed">{summary}</p> : <p className="text-xs text-gray-400 italic">Summary will appear here...</p>}
-      </div>
-
-      <div>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b pb-1 mb-2">Education</h3>
-        {education.length === 0 ? (
-          <p className="text-xs text-gray-400 italic">Education details will appear here...</p>
-        ) : (
-          education.map((edu: any, idx: number) => (
-            <div key={idx} className="mb-2">
-              <div className="flex justify-between font-semibold text-gray-900">
-                <span>{edu.degree}</span>
-                <span className="text-xs text-gray-500">{edu.year || edu.startDate}</span>
-              </div>
-              <div className="text-xs text-gray-600">{edu.institution || edu.school}</div>
-            </div>
-          ))
-        )}
-      </div>
-
-      <div>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b pb-1 mb-2">Experience</h3>
-        {experience.length === 0 ? (
-          <p className="text-xs text-gray-400 italic">Experience details will appear here...</p>
-        ) : (
-          experience.map((exp: any, idx: number) => (
-            <div key={idx} className="mb-3">
-              <div className="flex justify-between font-semibold text-gray-900">
-                <span>{exp.position || exp.role || exp.title}</span>
-                <span className="text-xs text-gray-500">{exp.startDate} - {exp.endDate}</span>
-              </div>
-              <div className="text-xs text-gray-600 font-medium">{exp.company}</div>
-              {renderBullets(exp.description)}
-            </div>
-          ))
-        )}
-      </div>
-
-      <div>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b pb-1 mb-2">Skills</h3>
-        {renderSkillsList(false)}
-      </div>
-
-      <div>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b pb-1 mb-2">Projects</h3>
-        {projects.length === 0 ? (
-          <p className="text-xs text-gray-400 italic">Projects will appear here...</p>
-        ) : (
-          projects.map((proj: any, idx: number) => (
-            <div key={idx} className="mb-3">
-              <div className="font-semibold text-gray-900">{proj.name || proj.title || 'Project Title'}</div>
-              {renderBullets(proj.description)}
-              {renderProjectTech(proj.technologies, false)}
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-
-  // 2. Classic Template
-  const renderClassicTemplate = () => (
-    <div className="space-y-4 text-sm text-gray-900 font-serif">
-      <div className="border-b-2 border-gray-900 pb-3">
-        <h1 className="text-2xl font-bold tracking-wide">{personalInfo.fullName || 'Your Full Name'}</h1>
-        <p className="text-xs font-semibold uppercase tracking-wider text-gray-700 mt-0.5">{personalInfo.jobTitle || 'Job Title'}</p>
-        <div className="flex gap-3 text-xs text-gray-600 mt-2 flex-wrap">
-          {personalInfo.email && <span>{personalInfo.email}</span>}
-          {personalInfo.phone && <span>| {personalInfo.phone}</span>}
-          {personalInfo.location && <span>| {personalInfo.location}</span>}
-          {personalInfo.linkedin && <span>| {personalInfo.linkedin}</span>}
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-400 pb-0.5 mb-1.5">Summary</h3>
-        {summary ? <p className="text-xs text-gray-800 leading-relaxed">{summary}</p> : <p className="text-xs text-gray-400 italic">Summary will appear here...</p>}
-      </div>
-
-      <div>
-        <h3 className="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-400 pb-0.5 mb-1.5">Education</h3>
-        {education.length === 0 ? (
-          <p className="text-xs text-gray-400 italic">Education details will appear here...</p>
-        ) : (
-          education.map((edu: any, idx: number) => (
-            <div key={idx} className="mb-2">
-              <div className="flex justify-between font-bold">
-                <span>{edu.degree}</span>
-                <span className="text-xs font-normal">{edu.year || edu.startDate}</span>
-              </div>
-              <div className="text-xs italic text-gray-700">{edu.institution || edu.school}</div>
-            </div>
-          ))
-        )}
-      </div>
-
-      <div>
-        <h3 className="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-400 pb-0.5 mb-1.5">Experience</h3>
-        {experience.length === 0 ? (
-          <p className="text-xs text-gray-400 italic">Experience details will appear here...</p>
-        ) : (
-          experience.map((exp: any, idx: number) => (
-            <div key={idx} className="mb-3">
-              <div className="flex justify-between font-bold">
-                <span>{exp.position || exp.role || exp.title} — <span className="font-normal italic">{exp.company}</span></span>
-                <span className="text-xs">{exp.startDate} - {exp.endDate}</span>
-              </div>
-              {renderBullets(exp.description)}
-            </div>
-          ))
-        )}
-      </div>
-
-      <div>
-        <h3 className="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-400 pb-0.5 mb-1.5">Skills</h3>
-        {renderSkillsList(true)}
-      </div>
-
-      <div>
-        <h3 className="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-400 pb-0.5 mb-1.5">Projects</h3>
-        {projects.length === 0 ? (
-          <p className="text-xs text-gray-400 italic">Projects will appear here...</p>
-        ) : (
-          projects.map((proj: any, idx: number) => (
-            <div key={idx} className="mb-3">
-              <div className="font-bold">{proj.name || proj.title}</div>
-              {renderBullets(proj.description)}
-              {renderProjectTech(proj.technologies, true)}
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-
-  // 3. Minimalist Template (Updated with LinkedIn & Dates)
-  const renderMinimalistTemplate = () => {
-    const contactLine = [personalInfo.email, personalInfo.phone, personalInfo.location, personalInfo.linkedin].filter(Boolean).join(' | ');
-    return (
-      <div className="space-y-5 text-sm font-mono text-gray-800">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight uppercase">{personalInfo.fullName || 'Your Full Name'}</h1>
-          <p className="text-xs text-gray-700 font-semibold mt-0.5">{personalInfo.jobTitle || 'Job Title'}</p>
-          {contactLine && <p className="text-xs text-gray-500 mt-1">{contactLine}</p>}
-        </div>
-        <div className="border-t pt-3">
-          <h2 className="text-xs font-bold uppercase tracking-widest mb-1">Summary</h2>
-          {summary ? <p className="text-xs text-gray-700">{summary}</p> : <p className="text-xs text-gray-400 italic">Summary will appear here...</p>}
-        </div>
-        <div className="border-t pt-3">
-          <h2 className="text-xs font-bold uppercase tracking-widest mb-1">Education</h2>
-          {education.length === 0 ? (
-            <p className="text-xs text-gray-400 italic">Education details will appear here...</p>
-          ) : (
-            education.map((edu: any, idx: number) => (
-              <div key={idx} className="mb-2 text-xs flex justify-between">
-                <span className="font-bold">{edu.degree} - {edu.institution || edu.school}</span>
-                <span className="text-gray-500">{edu.year || edu.startDate}</span>
-              </div>
-            ))
-          )}
-        </div>
-        <div className="border-t pt-3">
-          <h2 className="text-xs font-bold uppercase tracking-widest mb-2">Experience</h2>
-          {experience.length === 0 ? (
-            <p className="text-xs text-gray-400 italic">Experience details will appear here...</p>
-          ) : (
-            experience.map((exp: any, idx: number) => (
-              <div key={idx} className="mb-3">
-                <div className="flex justify-between font-bold text-xs">
-                  <span>{exp.position || exp.role || exp.title} @ {exp.company}</span>
-                  <span className="text-gray-500">{exp.startDate} - {exp.endDate}</span>
-                </div>
-                {renderBullets(exp.description)}
-              </div>
-            ))
-          )}
-        </div>
-        <div className="border-t pt-3">
-          <h2 className="text-xs font-bold uppercase tracking-widest mb-2">Skills</h2>
-          {renderSkillsList()}
-        </div>
-        <div className="border-t pt-3">
-          <h2 className="text-xs font-bold uppercase tracking-widest mb-2">Projects</h2>
-          {projects.length === 0 ? (
-            <p className="text-xs text-gray-400 italic">Projects will appear here...</p>
-          ) : (
-            projects.map((proj: any, idx: number) => (
-              <div key={idx} className="mb-3">
-                <div className="font-bold text-xs">{proj.name || proj.title}</div>
-                {renderBullets(proj.description)}
-                {renderProjectTech(proj.technologies)}
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  // 4. Professional Template (Updated with LinkedIn & Dates)
-  const renderProfessionalTemplate = () => {
-    const contactLine = [personalInfo.email, personalInfo.phone, personalInfo.location, personalInfo.linkedin].filter(Boolean).join(' • ');
-    return (
-      <div className="space-y-4 text-sm text-slate-800 border-l-4 border-slate-700 pl-4 font-sans">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 uppercase">{personalInfo.fullName || 'Your Full Name'}</h1>
-          <p className="text-xs text-slate-600 font-semibold">{personalInfo.jobTitle || 'Job Title'}</p>
-          {contactLine && <p className="text-xs text-slate-500 mt-0.5">{contactLine}</p>}
-        </div>
-        <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 bg-slate-100 p-1 mb-2">Summary</h3>
-          {summary ? <p className="text-xs text-slate-700">{summary}</p> : <p className="text-xs text-gray-400 italic">Summary will appear here...</p>}
-        </div>
-        <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 bg-slate-100 p-1 mb-2">Education</h3>
-          {education.length === 0 ? (
-            <p className="text-xs text-gray-400 italic">Education details will appear here...</p>
-          ) : (
-            education.map((edu: any, idx: number) => (
-              <div key={idx} className="mb-2 text-xs font-medium flex justify-between">
-                <span>{edu.degree} - {edu.institution || edu.school}</span>
-                <span className="text-slate-500">{edu.year || edu.startDate}</span>
-              </div>
-            ))
-          )}
-        </div>
-        <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 bg-slate-100 p-1 mb-2">Experience</h3>
-          {experience.length === 0 ? (
-            <p className="text-xs text-gray-400 italic">Work history will appear here...</p>
-          ) : (
-            experience.map((exp: any, idx: number) => (
-              <div key={idx} className="mb-2">
-                <div className="flex justify-between font-bold text-xs">
-                  <span>{exp.position || exp.role || exp.title} ({exp.company})</span>
-                  <span className="text-slate-500">{exp.startDate} - {exp.endDate}</span>
-                </div>
-                {renderBullets(exp.description)}
-              </div>
-            ))
-          )}
-        </div>
-        <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 bg-slate-100 p-1 mb-2">Skills</h3>
-          {renderSkillsList()}
-        </div>
-        <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 bg-slate-100 p-1 mb-2">Projects</h3>
-          {projects.length === 0 ? (
-            <p className="text-xs text-gray-400 italic">Projects will appear here...</p>
-          ) : (
-            projects.map((proj: any, idx: number) => (
-              <div key={idx} className="mb-2">
-                <div className="font-bold">{proj.name || proj.title}</div>
-                {renderBullets(proj.description)}
-                {renderProjectTech(proj.technologies)}
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  // 5. Compact Template (Updated with LinkedIn & Dates)
-  const renderCompactTemplate = () => {
-    const rightContact = [personalInfo.email, personalInfo.phone, personalInfo.location, personalInfo.linkedin].filter(Boolean).join(' | ');
-    return (
-      <div className="space-y-3 text-xs text-gray-900 font-sans">
-        <div className="flex justify-between items-baseline border-b-2 border-black pb-1">
-          <div>
-            <h1 className="text-lg font-bold">{personalInfo.fullName || 'Your Full Name'}</h1>
-            <p className="text-gray-600">{personalInfo.jobTitle || 'Job Title'}</p>
-          </div>
-          {rightContact && (
-            <div className="text-right text-[10px] text-gray-500 max-w-[250px]">
-              <p>{rightContact}</p>
-            </div>
-          )}
-        </div>
-        <div>
-          <h2 className="font-bold uppercase border-b mb-1">Summary</h2>
-          {summary ? <p className="text-gray-700">{summary}</p> : <p className="text-xs text-gray-400 italic">Summary will appear here...</p>}
-        </div>
-        <div>
-          <h2 className="font-bold uppercase border-b mb-1">Education</h2>
-          {education.length === 0 ? (
-            <p className="text-xs text-gray-400 italic">Education details will appear here...</p>
-          ) : (
-            education.map((edu: any, idx: number) => (
-              <div key={idx} className="mb-1 flex justify-between">
-                <span><span className="font-semibold">{edu.degree}</span> - {edu.institution || edu.school}</span>
-                <span className="text-gray-500">{edu.year || edu.startDate}</span>
-              </div>
-            ))
-          )}
-        </div>
-        <div>
-          <h2 className="font-bold uppercase border-b mb-1">Experience</h2>
-          {experience.length === 0 ? (
-            <p className="text-xs text-gray-400 italic">Experience details will appear here...</p>
-          ) : (
-            experience.map((exp: any, idx: number) => (
-              <div key={idx} className="mb-1.5">
-                <div className="flex justify-between">
-                  <span><span className="font-semibold">{exp.position || exp.role || exp.title}</span> - <span className="italic">{exp.company}</span></span>
-                  <span className="text-gray-500">{exp.startDate} - {exp.endDate}</span>
-                </div>
-                {renderBullets(exp.description)}
-              </div>
-            ))
-          )}
-        </div>
-        <div>
-          <h2 className="font-bold uppercase border-b mb-1">Skills</h2>
-          {renderSkillsList()}
-        </div>
-        <div>
-          <h2 className="font-bold uppercase border-b mb-1">Projects</h2>
-          {projects.length === 0 ? (
-            <p className="text-xs text-gray-400 italic">Projects will appear here...</p>
-          ) : (
-            projects.map((proj: any, idx: number) => (
-              <div key={idx} className="mb-1.5">
-                <span className="font-semibold">{proj.name || proj.title}</span>
-                {renderBullets(proj.description)}
-                {renderProjectTech(proj.technologies)}
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className="bg-white p-6 rounded-md min-h-[500px]">
-      {templateId === 'classic' && renderClassicTemplate()}
-      {templateId === 'minimalist' && renderMinimalistTemplate()}
-      {templateId === 'professional' && renderProfessionalTemplate()}
-      {templateId === 'compact' && renderCompactTemplate()}
-      {(templateId === 'modern' || !['classic', 'minimalist', 'professional', 'compact'].includes(templateId)) && renderModernTemplate()}
+    <div className="space-y-6 text-gray-800 font-sans">
+      {/* Template Switcher Tabs */}
+      <div className="flex items-center justify-between border-b pb-3 mb-4">
+        <span className="text-sm font-semibold text-gray-700">Template:</span>
+        <div className="flex flex-wrap gap-1 bg-gray-100 p-1 rounded-lg">
+          {AVAILABLE_TEMPLATES.map((tmpl) => (
+            <button
+              key={tmpl.id}
+              onClick={() => setTemplate(tmpl.id)}
+              className={`px-3 py-1 text-xs font-medium rounded-md transition ${
+                templateId === tmpl.id
+                  ? 'bg-blue-600 text-white shadow'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              {tmpl.name.split(' ')[0]}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* --- TEMPLATE 1: MODERN --- */}
+      {templateId === 'modern' && (
+        <div className="space-y-5 bg-white p-6 border rounded-lg shadow-sm">
+          <div className="text-center border-b pb-4">
+            <h1 className="text-3xl font-extrabold text-gray-900">{personalInfo.fullName || 'Your Full Name'}</h1>
+            <p className="text-sm font-medium text-blue-600 mt-1">{personalInfo.jobTitle || 'Job Title'}</p>
+            <div className="flex justify-center items-center flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500 mt-2">
+              {personalInfo.email && <span>{personalInfo.email}</span>}
+              {personalInfo.phone && <span>• {personalInfo.phone}</span>}
+              {personalInfo.location && <span>• {personalInfo.location}</span>}
+              {personalInfo.linkedin && (
+                <span>• <a href={personalInfo.linkedin.startsWith('http') ? personalInfo.linkedin : `https://${personalInfo.linkedin}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{personalInfo.linkedin}</a></span>
+              )}
+            </div>
+          </div>
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-200 pb-1 mb-1">Summary</h3>
+            <p className="text-xs text-gray-600">{summary || 'Summary will appear here...'}</p>
+          </div>
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-200 pb-1 mb-1">Education</h3>
+            {education.length > 0 ? (
+              <div className="space-y-2">
+                {education.map((edu: any, index: number) => (
+                  <div key={index} className="text-xs">
+                    <div className="flex justify-between font-semibold text-gray-800">
+                      <span>{edu.degree} — {edu.institution}</span>
+                      <span className="text-gray-500">{edu.graduationDate}</span>
+                    </div>
+                    {renderBulletPoints(edu.description)}
+                  </div>
+                ))}
+              </div>
+            ) : <p className="text-xs text-gray-400 italic">Education details...</p>}
+          </div>
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-200 pb-1 mb-1">Experience</h3>
+            {experience.length > 0 ? (
+              <div className="space-y-3">
+                {experience.map((exp: any, index: number) => (
+                  <div key={index} className="text-xs">
+                    <div className="flex justify-between font-semibold text-gray-800">
+                      <span>{exp.position} at {exp.company}</span>
+                      <span className="text-gray-500">{formatDate(exp.startDate)} - {exp.endDate ? formatDate(exp.endDate) : 'Present'}</span>
+                    </div>
+                    {renderBulletPoints(exp.description)}
+                  </div>
+                ))}
+              </div>
+            ) : <p className="text-xs text-gray-400 italic">Experience details...</p>}
+          </div>
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-200 pb-1 mb-1">Skills</h3>
+            {skills.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {skills.map((skill: any, index: number) => (
+                  <span key={index} className="bg-blue-50 text-blue-700 text-xs px-2.5 py-0.5 rounded border border-blue-100">
+                    {typeof skill === 'string' ? skill : skill.name}
+                  </span>
+                ))}
+              </div>
+            ) : <p className="text-xs text-gray-400 italic">Skills...</p>}
+          </div>
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-200 pb-1 mb-1">Projects</h3>
+            {projects.length > 0 ? (
+              <div className="space-y-3">
+                {projects.map((proj: any, index: number) => (
+                  <div key={index} className="text-xs">
+                    <div className="flex justify-between font-semibold text-gray-800">
+                      <span>{proj.title}</span>
+                      {proj.technologies && <span className="text-blue-600 font-normal">[{proj.technologies}]</span>}
+                    </div>
+                    {renderBulletPoints(proj.description)}
+                  </div>
+                ))}
+              </div>
+            ) : <p className="text-xs text-gray-400 italic">Projects...</p>}
+          </div>
+        </div>
+      )}
+
+      {/* --- TEMPLATE 2: CLASSIC --- */}
+      {templateId === 'classic' && (
+        <div className="space-y-4 bg-gray-50 p-6 border border-gray-300 rounded font-serif shadow-sm">
+          <div className="text-left border-b border-gray-400 pb-3">
+            <h1 className="text-2xl font-bold uppercase tracking-wide text-gray-900">{personalInfo.fullName || 'Your Full Name'}</h1>
+            <p className="text-sm text-gray-700 mt-0.5">{personalInfo.jobTitle || 'Job Title'}</p>
+            <div className="text-xs text-gray-600 mt-1 flex flex-wrap gap-x-4 gap-y-1">
+              {personalInfo.email && <span>Email: {personalInfo.email}</span>}
+              {personalInfo.phone && <span>Phone: {personalInfo.phone}</span>}
+              {personalInfo.location && <span>Location: {personalInfo.location}</span>}
+              {personalInfo.linkedin && <span>LinkedIn: {personalInfo.linkedin}</span>}
+            </div>
+          </div>
+          <div>
+            <h3 className="text-xs font-bold uppercase text-gray-900 border-b border-gray-300 pb-1 mb-1">Summary</h3>
+            <p className="text-xs text-gray-700">{summary || 'Summary...'}</p>
+          </div>
+          <div>
+            <h3 className="text-xs font-bold uppercase text-gray-900 border-b border-gray-300 pb-1 mb-1">Education</h3>
+            {education.map((edu: any, i: number) => (
+              <div key={i} className="text-xs mt-2">
+                <div className="flex justify-between font-bold text-gray-900">
+                  <span>{edu.institution} - {edu.degree}</span>
+                  <span className="font-normal text-gray-600">{edu.graduationDate}</span>
+                </div>
+                {renderBulletPoints(edu.description)}
+              </div>
+            ))}
+          </div>
+          <div>
+            <h3 className="text-xs font-bold uppercase text-gray-900 border-b border-gray-300 pb-1 mb-1">Experience</h3>
+            {experience.map((exp: any, i: number) => (
+              <div key={i} className="text-xs mt-2">
+                <div className="flex justify-between font-bold text-gray-900">
+                  <span>{exp.company} ({exp.position})</span>
+                  <span className="font-normal text-gray-600">{formatDate(exp.startDate)} to {exp.endDate ? formatDate(exp.endDate) : 'Present'}</span>
+                </div>
+                {renderBulletPoints(exp.description)}
+              </div>
+            ))}
+          </div>
+          <div>
+            <h3 className="text-xs font-bold uppercase text-gray-900 border-b border-gray-300 pb-1 mb-1">Skills</h3>
+            <p className="text-xs text-gray-700">
+              {skills.map((s: any) => (typeof s === 'string' ? s : s.name)).join(', ')}
+            </p>
+          </div>
+          <div>
+            <h3 className="text-xs font-bold uppercase text-gray-900 border-b border-gray-300 pb-1 mb-1">Projects</h3>
+            {projects.map((p: any, i: number) => (
+              <div key={i} className="text-xs mt-2">
+                <b>{p.title}</b> {p.technologies && `(${p.technologies})`}
+                {renderBulletPoints(p.description)}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* --- TEMPLATE 3: MINIMALIST (Fixed extra lines issue) --- */}
+      {templateId === 'minimalist' && (
+        <div className="space-y-4 bg-white p-6 border border-gray-200 font-light">
+          <div className="border-l-4 border-black pl-3 py-1">
+            <h1 className="text-2xl font-normal text-black">{personalInfo.fullName || 'Your Full Name'}</h1>
+            <p className="text-xs text-gray-500 tracking-wider uppercase">{personalInfo.jobTitle || 'Job Title'}</p>
+            {(personalInfo.email || personalInfo.phone || personalInfo.location) && (
+              <div className="text-[11px] text-gray-400 mt-1 flex flex-wrap gap-2">
+                {[personalInfo.email, personalInfo.phone, personalInfo.location, personalInfo.linkedin].filter(Boolean).join(' / ')}
+              </div>
+            )}
+          </div>
+          <div>
+            <h3 className="text-[11px] tracking-widest uppercase text-gray-400 mb-1 font-semibold">Profile</h3>
+            <p className="text-xs text-gray-700">{summary}</p>
+          </div>
+          <div>
+            <h3 className="text-[11px] tracking-widest uppercase text-gray-400 mb-1 font-semibold">Education</h3>
+            {education.map((e: any, i: number) => (
+              <div key={i} className="text-xs py-1">
+                <div className="flex justify-between font-medium text-black">
+                  <span>{e.degree}, {e.institution}</span>
+                  <span className="text-gray-400">{e.graduationDate}</span>
+                </div>
+                {renderBulletPoints(e.description)}
+              </div>
+            ))}
+          </div>
+          <div>
+            <h3 className="text-[11px] tracking-widest uppercase text-gray-400 mb-1 font-semibold">Experience</h3>
+            {experience.map((ex: any, i: number) => (
+              <div key={i} className="text-xs py-1">
+                <div className="flex justify-between font-medium text-black">
+                  <span>{ex.position} — {ex.company}</span>
+                  <span className="text-gray-400">{formatDate(ex.startDate)} - {ex.endDate ? formatDate(ex.endDate) : 'Present'}</span>
+                </div>
+                {renderBulletPoints(ex.description)}
+              </div>
+            ))}
+          </div>
+          <div>
+            <h3 className="text-[11px] tracking-widest uppercase text-gray-400 mb-1 font-semibold">Skills</h3>
+            <div className="text-xs text-gray-700">
+              {skills.map((s: any) => (typeof s === 'string' ? s : s.name)).join(' • ')}
+            </div>
+          </div>
+          <div>
+            <h3 className="text-[11px] tracking-widest uppercase text-gray-400 mb-1 font-semibold">Projects</h3>
+            {projects.map((pr: any, i: number) => (
+              <div key={i} className="text-xs py-1">
+                <span className="font-medium text-black">{pr.title}</span> {pr.technologies && <span className="text-gray-400">({pr.technologies})</span>}
+                {renderBulletPoints(pr.description)}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* --- TEMPLATE 4: PROFESSIONAL --- */}
+      {templateId === 'professional' && (
+        <div className="space-y-4 bg-slate-900 text-slate-100 p-6 rounded-lg shadow-md">
+          <div className="border-b border-slate-700 pb-3">
+            <h1 className="text-3xl font-bold tracking-wide text-cyan-400">{personalInfo.fullName || 'Your Full Name'}</h1>
+            <p className="text-xs text-slate-300 uppercase tracking-widest mt-1">{personalInfo.jobTitle || 'Job Title'}</p>
+            <div className="text-xs text-slate-400 mt-2 flex flex-wrap gap-x-4 gap-y-1">
+              {personalInfo.email && <span>{personalInfo.email}</span>}
+              {personalInfo.phone && <span>{personalInfo.phone}</span>}
+              {personalInfo.location && <span>{personalInfo.location}</span>}
+              {personalInfo.linkedin && <span className="text-cyan-300">{personalInfo.linkedin}</span>}
+            </div>
+          </div>
+          <div>
+            <h3 className="text-xs font-semibold tracking-wider text-cyan-400 uppercase mb-1">Professional Summary</h3>
+            <p className="text-xs text-slate-300">{summary}</p>
+          </div>
+          <div>
+            <h3 className="text-xs font-semibold tracking-wider text-cyan-400 uppercase mb-1">Education</h3>
+            {education.map((e: any, i: number) => (
+              <div key={i} className="text-xs py-1 border-b border-slate-800">
+                <div className="flex justify-between font-semibold text-slate-200">
+                  <span>{e.degree} ({e.institution})</span>
+                  <span className="text-slate-400">{e.graduationDate}</span>
+                </div>
+                {renderBulletPoints(e.description)}
+              </div>
+            ))}
+          </div>
+          <div>
+            <h3 className="text-xs font-semibold tracking-wider text-cyan-400 uppercase mb-1">Experience</h3>
+            {experience.map((ex: any, i: number) => (
+              <div key={i} className="text-xs py-1">
+                <div className="flex justify-between font-semibold text-slate-200">
+                  <span>{ex.position} at {ex.company}</span>
+                  <span className="text-slate-400">{formatDate(ex.startDate)} - {ex.endDate ? formatDate(ex.endDate) : 'Present'}</span>
+                </div>
+                <div className="text-slate-300">{renderBulletPoints(ex.description)}</div>
+              </div>
+            ))}
+          </div>
+          <div>
+            <h3 className="text-xs font-semibold tracking-wider text-cyan-400 uppercase mb-1">Skills</h3>
+            <div className="flex flex-wrap gap-1">
+              {skills.map((s: any, i: number) => (
+                <span key={i} className="bg-slate-800 text-cyan-300 text-[11px] px-2 py-0.5 rounded border border-slate-700">
+                  {typeof s === 'string' ? s : s.name}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h3 className="text-xs font-semibold tracking-wider text-cyan-400 uppercase mb-1">Projects</h3>
+            {projects.map((p: any, i: number) => (
+              <div key={i} className="text-xs py-1">
+                <span className="font-semibold text-slate-200">{p.title}</span> {p.technologies && <span className="text-cyan-300">[{p.technologies}]</span>}
+                <div className="text-slate-300">{renderBulletPoints(p.description)}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* --- TEMPLATE 5: COMPACT (Fixed missing Job Title issue) --- */}
+      {templateId === 'compact' && (
+        <div className="space-y-3 bg-white p-5 border border-gray-300 rounded text-xs shadow-sm">
+          <div className="flex justify-between items-baseline border-b pb-2">
+            <h1 className="text-xl font-bold text-gray-900">{personalInfo.fullName || 'Name'}</h1>
+            <span className="text-gray-500 font-medium">{personalInfo.jobTitle || 'Job Title'}</span>
+          </div>
+          <div className="text-[11px] text-gray-500 flex flex-wrap gap-x-4 gap-y-1">
+            {personalInfo.email && <span>{personalInfo.email}</span>}
+            {personalInfo.phone && <span>{personalInfo.phone}</span>}
+            {personalInfo.location && <span>{personalInfo.location}</span>}
+            {personalInfo.linkedin && <span className="text-blue-600">{personalInfo.linkedin}</span>}
+          </div>
+          <div>
+            <h4 className="font-bold text-gray-800 uppercase text-[10px] tracking-wider border-b border-gray-100 pb-0.5 mb-1">Summary</h4>
+            <p className="text-gray-600 text-[11px]">{summary}</p>
+          </div>
+          <div>
+            <h4 className="font-bold text-gray-800 uppercase text-[10px] tracking-wider border-b border-gray-100 pb-0.5 mb-1">Education</h4>
+            {education.map((e: any, i: number) => (
+              <div key={i} className="mt-1 text-gray-600">
+                <div className="flex justify-between font-semibold">
+                  <span>{e.degree} — {e.institution}</span>
+                  <span>{e.graduationDate}</span>
+                </div>
+                {e.description && <div className="text-[11px] text-gray-500 mt-0.5">{renderBulletPoints(e.description)}</div>}
+              </div>
+            ))}
+          </div>
+          <div>
+            <h4 className="font-bold text-gray-800 uppercase text-[10px] tracking-wider border-b border-gray-100 pb-0.5 mb-1">Experience</h4>
+            {experience.map((ex: any, i: number) => (
+              <div key={i} className="mt-1 text-gray-600">
+                <div className="flex justify-between font-semibold">
+                  <span>{ex.position} @ {ex.company}</span>
+                  <span>{formatDate(ex.startDate)} - {ex.endDate ? formatDate(ex.endDate) : 'Present'}</span>
+                </div>
+                {ex.description && <div className="text-[11px] text-gray-500 mt-0.5">{renderBulletPoints(ex.description)}</div>}
+              </div>
+            ))}
+          </div>
+          <div>
+            <h4 className="font-bold text-gray-800 uppercase text-[10px] tracking-wider border-b border-gray-100 pb-0.5 mb-1">Skills</h4>
+            <p className="text-gray-600 text-[11px]">
+              {skills.map((s: any) => (typeof s === 'string' ? s : s.name)).join(', ')}
+            </p>
+          </div>
+          <div>
+            <h4 className="font-bold text-gray-800 uppercase text-[10px] tracking-wider border-b border-gray-100 pb-0.5 mb-1">Projects</h4>
+            {projects.map((p: any, i: number) => (
+              <div key={i} className="mt-1 text-gray-600">
+                <span className="font-semibold">{p.title}</span> {p.technologies ? `[${p.technologies}]` : ''}
+                {p.description && <div className="text-[11px] text-gray-500 mt-0.5">{renderBulletPoints(p.description)}</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

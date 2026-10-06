@@ -5,103 +5,90 @@ import { useResumeStore } from '@/store/useResumeStore';
 
 export function ExperienceSection() {
   const { resumeData, addExperience, updateExperience, removeExperience, reorderExperience } = useResumeStore();
-  const { experience } = resumeData;
+  const { experience = [] } = resumeData;
 
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-white shadow-sm mb-6">
       <h3 className="font-semibold text-lg text-gray-800">Experience</h3>
       
-      {experience.map((exp: any, index: number) => (
-        <div key={exp.id} className="border p-3 rounded-md space-y-2 bg-gray-50 relative">
-          {/* Reorder and Card Header Controls */}
-          <div className="flex justify-between items-center pb-1 border-b border-gray-200 mb-2">
-            <span className="text-xs font-semibold text-gray-500">Experience #{index + 1}</span>
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => reorderExperience(index, 'up')}
-                disabled={index === 0}
-                className="px-2 py-0.5 bg-gray-200 text-gray-700 text-xs rounded disabled:opacity-30 hover:bg-gray-300 transition cursor-pointer"
-                title="Move Up"
-              >
-                ▲ Up
-              </button>
-              <button
-                type="button"
-                onClick={() => reorderExperience(index, 'down')}
-                disabled={index === experience.length - 1}
-                className="px-2 py-0.5 bg-gray-200 text-gray-700 text-xs rounded disabled:opacity-30 hover:bg-gray-300 transition cursor-pointer"
-                title="Move Down"
-              >
-                ▼ Down
-              </button>
-            </div>
-          </div>
+      {experience.map((exp, index) => {
+        const uniqueId = exp.id || `exp-${index}-${Date.now()}`;
 
-          <input
-            className="w-full border rounded px-3 py-1.5 text-sm bg-white"
-            placeholder="Job Title (e.g. Software Developer)"
-            value={exp.position || ''}
-            onChange={(e) => updateExperience(exp.id, 'position', e.target.value)}
-          />
-          <input
-            className="w-full border rounded px-3 py-1.5 text-sm bg-white"
-            placeholder="Company Name"
-            value={exp.company || ''}
-            onChange={(e) => updateExperience(exp.id, 'company', e.target.value)}
-          />
-          <div className="flex gap-2">
+        return (
+          <div key={uniqueId} className="border p-3 rounded-md space-y-2 bg-gray-50 relative">
+            {/* Reorder and Card Header Controls */}
+            <div className="flex justify-between items-center pb-1 border-b border-gray-200 mb-2">
+              <span className="text-xs font-semibold text-gray-500">Experience #{index + 1}</span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => reorderExperience(index, 'up')}
+                  disabled={index === 0}
+                  className="px-2 py-0.5 bg-gray-200 text-gray-700 text-xs rounded disabled:opacity-30 hover:bg-gray-300 transition cursor-pointer"
+                  title="Move Up"
+                >
+                  ▲ Up
+                </button>
+                <button
+                  type="button"
+                  onClick={() => reorderExperience(index, 'down')}
+                  disabled={index === experience.length - 1}
+                  className="px-2 py-0.5 bg-gray-200 text-gray-700 text-xs rounded disabled:opacity-30 hover:bg-gray-300 transition cursor-pointer"
+                  title="Move Down"
+                >
+                  ▼ Down
+                </button>
+              </div>
+            </div>
+
             <input
-              className="w-1/2 border rounded px-3 py-1.5 text-sm bg-white"
-              placeholder="Start Date"
-              value={exp.startDate || ''}
-              onChange={(e) => updateExperience(exp.id, 'startDate', e.target.value)}
+              className="w-full border rounded px-3 py-1.5 text-sm bg-white text-black"
+              placeholder="Company Name (e.g. KvonTech)"
+              value={exp.company || ''}
+              onChange={(e) => updateExperience(uniqueId, 'company', e.target.value)}
             />
             <input
-              className="w-1/2 border rounded px-3 py-1.5 text-sm bg-white"
-              placeholder="End Date"
-              value={exp.endDate || ''}
-              onChange={(e) => updateExperience(exp.id, 'endDate', e.target.value)}
+              className="w-full border rounded px-3 py-1.5 text-sm bg-white text-black"
+              placeholder="Position / Role (e.g. Junior Associate Developer)"
+              value={exp.position || ''}
+              onChange={(e) => updateExperience(uniqueId, 'position', e.target.value)}
             />
-          </div>
-          
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <label className="text-xs font-medium text-gray-700">Description / Responsibilities</label>
-              <button
-                type="button"
-                onClick={() => {
-                  const currentDesc = exp.description || '';
-                  const newVal = currentDesc.trim() === '' ? '• ' : currentDesc + '\n• ';
-                  updateExperience(exp.id, 'description', newVal);
-                }}
-                className="text-[11px] bg-blue-50 text-blue-600 hover:bg-blue-100 px-2 py-0.5 rounded font-medium transition cursor-pointer"
-              >
-                + Add Bullet
-              </button>
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                className="w-full border rounded px-3 py-1.5 text-sm bg-white text-black"
+                placeholder="Start Date (e.g. Jan 2026)"
+                value={exp.startDate || ''}
+                onChange={(e) => updateExperience(uniqueId, 'startDate', e.target.value)}
+              />
+              <input
+                className="w-full border rounded px-3 py-1.5 text-sm bg-white text-black"
+                placeholder="End Date (e.g. Apr 2026 or Present)"
+                value={exp.endDate || ''}
+                onChange={(e) => updateExperience(uniqueId, 'endDate', e.target.value)}
+              />
             </div>
             <textarea
-              className="w-full border rounded px-3 py-1.5 text-sm bg-white"
-              placeholder="Click '+ Add Bullet' or write point by point..."
               rows={3}
+              className="w-full border rounded px-3 py-1.5 text-sm bg-white text-black"
+              placeholder="Description of your responsibilities and achievements..."
               value={exp.description || ''}
-              onChange={(e) => updateExperience(exp.id, 'description', e.target.value)}
+              onChange={(e) => updateExperience(uniqueId, 'description', e.target.value)}
             />
-          </div>
 
-          <button 
-            type="button"
-            onClick={() => removeExperience(exp.id)} 
-            className="text-red-500 text-xs font-medium hover:underline pt-1 block cursor-pointer"
-          >
-            Remove Experience
-          </button>
-        </div>
-      ))}
+            <button 
+              type="button"
+              onClick={() => removeExperience(uniqueId)} 
+              className="text-red-500 text-xs font-medium hover:underline pt-1 block cursor-pointer"
+            >
+              Remove Experience
+            </button>
+          </div>
+        );
+      })}
 
       <button 
         type="button"
-        onClick={() => addExperience({ company: '', position: '', startDate: '', endDate: '', description: '' })} 
+        onClick={() => addExperience({ id: Date.now().toString(), company: '', position: '', startDate: '', endDate: '', description: '' })} 
         className="w-full py-2 bg-blue-50 text-blue-600 rounded-md text-sm font-medium hover:bg-blue-100 transition cursor-pointer"
       >
         + Add Experience

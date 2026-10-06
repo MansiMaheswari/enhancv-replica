@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import { LivePreview } from '@/components/preview/LivePreview';
+
 
 export default function TemplatesPage() {
   const router = useRouter();
