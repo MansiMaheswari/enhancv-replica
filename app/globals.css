@@ -1,3 +1,31 @@
 @import "tailwindcss";
 
+@media print {
+  /* Baaki sabhi elements ko chhupa do */
+  body * {
+    visibility: hidden !important;
+  }
+  
+  /* Sirf resume-preview aur uske andar ki cheezein dikhni chahiye */
+  #resume-preview, #resume-preview * {
+    visibility: visible !important;
+  }
+  
+  /* Resume box ko bilkul clean aur top par set karo */
+  #resume-preview {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    box-shadow: none !important;
+    border: none !important;
+    background-color: white !important;
+  }
 
+  /* Buttons, dropdowns aur template bar ko print se bilkul hata do */
+  button, select, input, .template-selector-bar, .no-print {
+    display: none !important;
+  }
+}

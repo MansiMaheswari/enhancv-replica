@@ -10,6 +10,7 @@ import { SkillsSection } from '@/components/editor/SkillsSection';
 import { ProjectsSection } from '@/components/editor/ProjectSection';
 import { LivePreview } from '@/components/preview/LivePreview';
 import { useResumeStore, AVAILABLE_TEMPLATES } from '@/store/useResumeStore';
+import { calculateATSScore } from '@/lib/atsChecker';
 
 export default function BuilderPage() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function BuilderPage() {
   useEffect(() => {
     async function checkUser() {
       setLoadingUser(true);
-      resetResume(); // Purana data turant wipe karo page load par hi
+      resetResume();
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -38,7 +39,6 @@ export default function BuilderPage() {
 
   const handleLogout = async () => {
     try {
-      // Forcefully sign out from Supabase globally and destroy internal session cache
       await supabase.auth.signOut({ scope: 'global' });
     } catch (err) {
       console.error("Signout error:", err);
@@ -46,7 +46,6 @@ export default function BuilderPage() {
 
     resetResume();
     
-    // Clear entire browser local/session storage and force hard reload to login page
     if (typeof window !== 'undefined') {
       localStorage.clear();
       sessionStorage.clear();
@@ -54,7 +53,6 @@ export default function BuilderPage() {
     }
   };
 
-  // Save resume using 'id'
   const handleSaveResume = async () => {
     if (!userId) {
       alert("User not authenticated!");
@@ -83,54 +81,31 @@ export default function BuilderPage() {
     }
   };
 
-  // Download PDF Handler (Fixed for 'lab' and 'oklch' color errors)
-  const handleDownloadPDF = async () => {
-    const element = document.getElementById('resume-preview');
-    if (!element) {
-      alert("Preview element not found!");
-      return;
+  const handleCheckATS = () => {
+    const jobDescription = prompt(
+      "Paste Job Description (JD) here for Keyword Matching:\n(Or leave blank for format/completeness check only)"
+    ) || '';
+
+    const result = calculateATSScore(resumeData, jobDescription);
+
+    let matchInfo = '';
+    if (jobDescription.trim() !== '') {
+      matchInfo = `\n\n🎯 Matched Keywords (${result.matchedKeywords.length}): ${result.matchedKeywords.slice(0, 5).join(', ')}\n❌ Missing Keywords (${result.missingKeywords.length}): ${result.missingKeywords.slice(0, 5).join(', ')}`;
     }
 
-    try {
-      const html2pdf = (await import('html2pdf.js')).default;
-      const options: any = {
-        margin: 10,
-        filename: 'my-resume.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-          scale: 2, 
-          useCORS: true,
-          onclone: (clonedDoc: Document) => {
-            const allElements = clonedDoc.querySelectorAll('*');
-            allElements.forEach((el) => {
-              const htmlEl = el as HTMLElement;
-              const computedStyle = window.getComputedStyle(htmlEl);
-              
-              if (computedStyle.color && (computedStyle.color.includes('lab') || computedStyle.color.includes('oklch'))) {
-                htmlEl.style.color = '#000000';
-              }
-              if (computedStyle.backgroundColor && (computedStyle.backgroundColor.includes('lab') || computedStyle.backgroundColor.includes('oklch'))) {
-                htmlEl.style.backgroundColor = 'transparent';
-              }
-              if (computedStyle.borderColor && (computedStyle.borderColor.includes('lab') || computedStyle.borderColor.includes('oklch'))) {
-                htmlEl.style.borderColor = '#cccccc';
-              }
-            });
-          }
-        },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
-
-      html2pdf().from(element).set(options).save();
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      alert("Failed to download PDF.");
-    }
+    const suggestionsText = result.suggestions.length > 0 
+      ? result.suggestions.map((s, i) => `${i + 1}. ${s}`).join('\n')
+      : "Great job! Your resume looks fully optimized for ATS.";
+    
+    alert(`📊 ATS Compatibility Score: ${result.score}/100${matchInfo}\n\n💡 Suggestions:\n${suggestionsText}`);
   };
 
-  // Load resume data using 'id' with strict state reset
+  const handleDownloadPDF = () => {
+    window.print();
+  };
+
   const loadUserResume = async (currentUserId: string) => {
-    resetResume(); // Clear state instantly
+    resetResume();
 
     try {
       const { data, error } = await supabase
@@ -146,7 +121,6 @@ export default function BuilderPage() {
       }
 
       setResumeData(data.full_data);
-      console.log("Loaded resume data from Supabase:", data.full_data);
     } catch (error) {
       console.error("Error loading resume:", error);
       resetResume();
@@ -159,25 +133,34 @@ export default function BuilderPage() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gray-100">
-      {/* Left Panel: Resume Editor */}
       <div className="w-1/2 p-6 overflow-y-auto border-r border-gray-200 bg-white space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-800">Resume Editor</h2>
           
           <div className="flex gap-2">
             <button 
+              type="button"
+              onClick={handleCheckATS}
+              className="bg-purple-600 text-white px-3 py-2 rounded-md hover:bg-purple-700 transition text-sm font-medium shadow"
+            >
+              Check ATS Score
+            </button>
+            <button 
+              type="button"
               onClick={handleDownloadPDF}
-              className="bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition text-sm font-medium shadow"
+              className="bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition text-sm font-medium shadow cursor-pointer"
             >
               Download PDF
             </button>
             <button 
+              type="button"
               onClick={handleSaveResume}
               className="bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition text-sm font-medium shadow"
             >
               Save Resume
             </button>
             <button 
+              type="button"
               onClick={handleLogout}
               className="bg-red-600 text-white px-3 py-2 rounded-md hover:bg-red-700 transition text-sm font-medium shadow"
             >
@@ -186,7 +169,6 @@ export default function BuilderPage() {
           </div>
         </div>
 
-        {/* Template Selector Section */}
         <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
           <label className="block text-sm font-semibold text-blue-900 mb-2">Select Resume Template</label>
           <select
@@ -202,7 +184,6 @@ export default function BuilderPage() {
           </select>
         </div>
         
-        {/* Personal Information */}
         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-700 mb-3">Personal Information</h3>
           <div className="space-y-4">
@@ -275,7 +256,6 @@ export default function BuilderPage() {
           </div>
         </div>
 
-        {/* Professional Summary Section */}
         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-700 mb-3">Professional Summary</h3>
           <textarea
@@ -293,7 +273,6 @@ export default function BuilderPage() {
         <ProjectsSection />
       </div>
 
-      {/* Right Panel: Live Preview */}
       <div className="w-1/2 p-6 overflow-y-auto bg-gray-50 flex justify-center items-start">
         <div id="resume-preview" className="w-full max-w-2xl bg-white min-h-[800px] shadow-lg p-8 rounded-md">
           <LivePreview />

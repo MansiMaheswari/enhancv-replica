@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useResumeStore } from '@/store/useResumeStore';
 import { LivePreview } from '@/components/preview/LivePreview';
 import { ExperienceSection } from '@/components/editor/ExperienceSection';
@@ -8,6 +8,7 @@ import { EducationSection } from '@/components/editor/EducationSection';
 import { SkillsSection } from '@/components/editor/SkillsSection';
 import { ProjectsSection } from '@/components/editor/ProjectSection';
 import { supabase } from '@/lib/supabaseClient';
+import { calculateATSScore } from '@/lib/atsChecker';
 
 export default function HomePage() {
   const { resumeData, updatePersonalInfo, updateSummary, setTemplate } = useResumeStore();
@@ -15,9 +16,20 @@ export default function HomePage() {
   const summary = resumeData?.summary || '';
   const currentTemplate = resumeData?.templateId || 'modern';
 
+  // ATS Score State
+  const [atsResult, setAtsResult] = useState<{ score: number; suggestions: string[] }>({
+    score: 0,
+    suggestions: [],
+  });
+
+  const handleCheckATS = () => {
+    const result = calculateATSScore(resumeData);
+    setAtsResult(result);
+  };
+
   const handleSaveResume = async () => {
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('resumes')
         .insert([
           { 
@@ -39,13 +51,19 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-6">
-      {/* Header Bar - print:hidden se header bhi print me nahi aayega */}
+      {/* Header Bar */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 max-w-7xl mx-auto gap-4 print:hidden">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Resume Editor v1</h1>
-          <p className="text-sm text-gray-500">Fill out your details to generate your professional resume.</p>
+          <h1 className="text-2xl font-bold text-gray-900">Resume Editor - Week 9 (ATS Checker)</h1>
+          <p className="text-sm text-gray-500">Fill out your details and check your ATS compatibility score.</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
+          <button 
+            onClick={handleCheckATS}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-semibold shadow transition-all"
+          >
+            Check ATS Score {atsResult.score > 0 ? `(${atsResult.score}%)` : ''}
+          </button>
           <button 
             onClick={handleSaveResume}
             className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-semibold shadow transition-all"
@@ -61,10 +79,27 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* ATS Score Results Card (Agar score check kiya ho to dikhega) */}
+      {atsResult.suggestions.length > 0 && (
+        <div className="max-w-7xl mx-auto mb-6 bg-purple-50 border border-purple-200 p-4 rounded-xl print:hidden shadow-sm">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-sm font-bold text-purple-900">
+              ATS Compatibility Score: <span className="text-purple-700 text-base">{atsResult.score}/100</span>
+            </h3>
+            <span className="text-xs text-purple-600 font-medium">Follow suggestions to boost your score</span>
+          </div>
+          <ul className="list-disc list-inside text-xs text-purple-800 space-y-1">
+            {atsResult.suggestions.map((suggestion, index) => (
+              <li key={index}>{suggestion}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Main Grid - Responsive for Mobile & Desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-7xl mx-auto">
         
-        {/* Left Side: Editor Sections - Added print:hidden here */}
+        {/* Left Side: Editor Sections */}
         <div className="col-span-12 lg:col-span-6 space-y-6 print:hidden">
           {/* Personal Info */}
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
@@ -152,7 +187,7 @@ export default function HomePage() {
           <ProjectsSection />
         </div>
 
-        {/* Right Side: Live Preview - Yeh print me full width aur clean aayega */}
+        {/* Right Side: Live Preview */}
         <div className="col-span-12 lg:col-span-6 space-y-4 w-full lg:w-auto">
           <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm lg:sticky lg:top-6">
             <div className="flex justify-between items-center mb-4 border-b pb-3 flex-wrap gap-2 print:hidden">
@@ -165,7 +200,7 @@ export default function HomePage() {
                 {['modern', 'classic', 'minimalist', 'professional', 'compact'].map((tmpl) => (
                   <button
                     key={tmpl}
-                    onClick={() => setTemplate(tmpl as any)}
+                    onClick={() => setTemplate(tmpl)}
                     className={`px-2.5 py-1 rounded-md transition-all text-xs font-medium capitalize ${
                       currentTemplate === tmpl
                         ? 'bg-blue-600 text-white shadow-sm'
