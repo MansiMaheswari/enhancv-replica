@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import { SummarySection } from '@/components/editor/SummarySection';
 import { ExperienceSection } from '@/components/editor/ExperienceSection';
 import { EducationSection } from '@/components/editor/EducationSection';
 import { SkillsSection } from '@/components/editor/SkillsSection';
@@ -14,7 +15,7 @@ import { calculateATSScore } from '@/lib/atsChecker';
 
 export default function BuilderPage() {
   const router = useRouter();
-  const { resumeData, updatePersonalInfo, updateSummary, setResumeData, setTemplate, resetResume } = useResumeStore();
+  const { resumeData, updatePersonalInfo, setResumeData, setTemplate, resetResume } = useResumeStore();
   const [userId, setUserId] = useState<string | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
@@ -256,16 +257,8 @@ export default function BuilderPage() {
           </div>
         </div>
 
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-700 mb-3">Professional Summary</h3>
-          <textarea
-            rows={4}
-            placeholder="Write a brief summary about yourself..."
-            value={resumeData?.summary || ''}
-            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
-            onChange={(e) => updateSummary(e.target.value)}
-          />
-        </div>
+        {/* Professional Summary Section with AI Button */}
+        <SummarySection />
 
         <EducationSection />
         <ExperienceSection />

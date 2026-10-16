@@ -73,7 +73,7 @@ export function LivePreview() {
                 {education.map((edu: any, index: number) => (
                   <div key={index} className="text-xs">
                     <div className="flex justify-between font-semibold text-gray-800">
-                      <span>{edu.degree} — {edu.institution}</span>
+                      <span>{edu.degree}{edu.degree && edu.institution ? ' — ' : ''}{edu.institution}</span>
                       <span className="text-gray-500">{edu.graduationDate}</span>
                     </div>
                     {renderBulletPoints(edu.description)}
@@ -89,10 +89,20 @@ export function LivePreview() {
               <div className="space-y-3">
                 {experience.map((exp: any, index: number) => (
                   <div key={index} className="text-xs">
-                    <div className="flex justify-between font-semibold text-gray-800">
-                      <span>{exp.position} at {exp.company}</span>
-                      <span className="text-gray-500">{formatDate(exp.startDate)} - {exp.endDate ? formatDate(exp.endDate) : 'Present'}</span>
-                    </div>
+                    {(exp.position || exp.company) && (
+                      <div className="flex justify-between font-semibold text-gray-800">
+                        <span>
+                          {exp.position}
+                          {exp.position && exp.company ? ' at ' : ''}
+                          {exp.company}
+                        </span>
+                        <span className="text-gray-500">
+                          {exp.startDate ? formatDate(exp.startDate) : ''}
+                          {exp.startDate && (exp.endDate || exp.startDate) ? ' - ' : ''}
+                          {exp.endDate ? formatDate(exp.endDate) : (exp.startDate ? 'Present' : '')}
+                        </span>
+                      </div>
+                    )}
                     {renderBulletPoints(exp.description)}
                   </div>
                 ))}
@@ -158,7 +168,7 @@ export function LivePreview() {
                 {education.map((edu: any, i: number) => (
                   <div key={i} className="text-xs">
                     <div className="flex justify-between font-bold text-gray-900">
-                      <span>{edu.institution} - {edu.degree}</span>
+                      <span>{edu.institution}{edu.institution && edu.degree ? ' - ' : ''}{edu.degree}</span>
                       <span className="font-normal text-gray-600">{edu.graduationDate}</span>
                     </div>
                     {renderBulletPoints(edu.description)}
@@ -174,10 +184,16 @@ export function LivePreview() {
               <div className="space-y-3">
                 {experience.map((exp: any, i: number) => (
                   <div key={i} className="text-xs">
-                    <div className="flex justify-between font-bold text-gray-900">
-                      <span>{exp.company} ({exp.position})</span>
-                      <span className="font-normal text-gray-600">{formatDate(exp.startDate)} to {exp.endDate ? formatDate(exp.endDate) : 'Present'}</span>
-                    </div>
+                    {(exp.company || exp.position) && (
+                      <div className="flex justify-between font-bold text-gray-900">
+                        <span>{exp.company}{exp.company && exp.position ? ` (${exp.position})` : exp.position}</span>
+                        <span className="font-normal text-gray-600">
+                          {exp.startDate ? formatDate(exp.startDate) : ''}
+                          {exp.startDate && (exp.endDate || exp.startDate) ? ' to ' : ''}
+                          {exp.endDate ? formatDate(exp.endDate) : (exp.startDate ? 'Present' : '')}
+                        </span>
+                      </div>
+                    )}
                     {renderBulletPoints(exp.description)}
                   </div>
                 ))}
@@ -235,7 +251,7 @@ export function LivePreview() {
                 {education.map((e: any, i: number) => (
                   <div key={i} className="text-xs">
                     <div className="flex justify-between font-medium text-black">
-                      <span>{e.degree}, {e.institution}</span>
+                      <span>{e.degree}{e.degree && e.institution ? ', ' : ''}{e.institution}</span>
                       <span className="text-gray-400">{e.graduationDate}</span>
                     </div>
                     {renderBulletPoints(e.description)}
@@ -251,10 +267,16 @@ export function LivePreview() {
               <div className="space-y-3">
                 {experience.map((ex: any, i: number) => (
                   <div key={i} className="text-xs">
-                    <div className="flex justify-between font-medium text-black">
-                      <span>{ex.position} — {ex.company}</span>
-                      <span className="text-gray-400">{formatDate(ex.startDate)} - {ex.endDate ? formatDate(ex.endDate) : 'Present'}</span>
-                    </div>
+                    {(ex.position || ex.company) && (
+                      <div className="flex justify-between font-medium text-black">
+                        <span>{ex.position}{ex.position && ex.company ? ' — ' : ''}{ex.company}</span>
+                        <span className="text-gray-400">
+                          {ex.startDate ? formatDate(ex.startDate) : ''}
+                          {ex.startDate && (ex.endDate || ex.startDate) ? ' - ' : ''}
+                          {ex.endDate ? formatDate(ex.endDate) : (ex.startDate ? 'Present' : '')}
+                        </span>
+                      </div>
+                    )}
                     {renderBulletPoints(ex.description)}
                   </div>
                 ))}
@@ -313,7 +335,7 @@ export function LivePreview() {
                 {education.map((e: any, i: number) => (
                   <div key={i} className="text-xs">
                     <div className="flex justify-between font-bold text-slate-800">
-                      <span>{e.degree} ({e.institution})</span>
+                      <span>{e.degree}{e.degree && e.institution ? ' (' : ''}{e.institution}{e.degree && e.institution ? ')' : ''}</span>
                       <span className="text-slate-500 font-normal">{e.graduationDate}</span>
                     </div>
                     {renderBulletPoints(e.description)}
@@ -329,10 +351,20 @@ export function LivePreview() {
               <div className="space-y-3">
                 {experience.map((ex: any, i: number) => (
                   <div key={i} className="text-xs">
-                    <div className="flex justify-between font-bold text-slate-800">
-                      <span>{ex.position} at {ex.company}</span>
-                      <span className="text-slate-500 font-normal">{formatDate(ex.startDate)} - {ex.endDate ? formatDate(ex.endDate) : 'Present'}</span>
-                    </div>
+                    {(ex.position || ex.company) && (
+                      <div className="flex justify-between font-bold text-slate-800">
+                        <span>
+                          {ex.position}
+                          {ex.position && ex.company ? ' at ' : ''}
+                          {ex.company}
+                        </span>
+                        <span className="text-slate-500 font-normal">
+                          {ex.startDate ? formatDate(ex.startDate) : ''}
+                          {ex.startDate && (ex.endDate || ex.startDate) ? ' - ' : ''}
+                          {ex.endDate ? formatDate(ex.endDate) : (ex.startDate ? 'Present' : '')}
+                        </span>
+                      </div>
+                    )}
                     {renderBulletPoints(ex.description)}
                   </div>
                 ))}
@@ -395,7 +427,7 @@ export function LivePreview() {
                 {education.map((e: any, i: number) => (
                   <div key={i} className="text-xs text-gray-700">
                     <div className="flex justify-between font-semibold">
-                      <span>{e.degree} — {e.institution}</span>
+                      <span>{e.degree}{e.degree && e.institution ? ' — ' : ''}{e.institution}</span>
                       <span className="text-gray-500">{e.graduationDate}</span>
                     </div>
                     {renderBulletPoints(e.description)}
@@ -411,10 +443,16 @@ export function LivePreview() {
               <div className="space-y-3">
                 {experience.map((ex: any, i: number) => (
                   <div key={i} className="text-xs text-gray-700">
-                    <div className="flex justify-between font-semibold">
-                      <span>{ex.position} @ {ex.company}</span>
-                      <span className="text-gray-500">{formatDate(ex.startDate)} - {ex.endDate ? formatDate(ex.endDate) : 'Present'}</span>
-                    </div>
+                    {(ex.position || ex.company) && (
+                      <div className="flex justify-between font-semibold">
+                        <span>{ex.position}{ex.position && ex.company ? ' @ ' : ''}{ex.company}</span>
+                        <span className="text-gray-500">
+                          {ex.startDate ? formatDate(ex.startDate) : ''}
+                          {ex.startDate && (ex.endDate || ex.startDate) ? ' - ' : ''}
+                          {ex.endDate ? formatDate(ex.endDate) : (ex.startDate ? 'Present' : '')}
+                        </span>
+                      </div>
+                    )}
                     {renderBulletPoints(ex.description)}
                   </div>
                 ))}
