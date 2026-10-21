@@ -133,12 +133,12 @@ export default function BuilderPage() {
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-gray-100">
-      <div className="w-1/2 p-6 overflow-y-auto border-r border-gray-200 bg-white space-y-6">
-        <div className="flex justify-between items-center">
+    <div className="flex flex-col lg:flex-row min-h-screen lg:h-screen w-full lg:overflow-hidden bg-gray-100">
+      <div className="w-full lg:w-1/2 p-4 lg:p-6 overflow-y-auto border-r border-gray-200 bg-white space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h2 className="text-2xl font-bold text-gray-800">Resume Editor</h2>
           
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button 
               type="button"
               onClick={handleCheckATS}
@@ -188,7 +188,7 @@ export default function BuilderPage() {
         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-700 mb-3">Personal Information</h3>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1">Full Name</label>
                 <input 
@@ -210,7 +210,7 @@ export default function BuilderPage() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1">Email</label>
                 <input 
@@ -232,7 +232,7 @@ export default function BuilderPage() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1">Location</label>
                 <input 
@@ -257,20 +257,18 @@ export default function BuilderPage() {
           </div>
         </div>
 
-        {/* Professional Summary Section with AI Button */}
         <SummarySection />
-
         <EducationSection />
         <ExperienceSection />
         <SkillsSection />
         <ProjectsSection />
       </div>
 
-      <div className="w-1/2 p-6 overflow-y-auto bg-gray-50 flex justify-center items-start">
+      <div className="w-full lg:w-1/2 p-4 lg:p-6 overflow-y-auto bg-gray-50 flex justify-center items-start">
         <div id="resume-preview" className="w-full max-w-2xl bg-white min-h-[800px] shadow-lg p-8 rounded-md">
           <LivePreview />
         </div>
       </div>
     </div>
-  );
+  )
 }
