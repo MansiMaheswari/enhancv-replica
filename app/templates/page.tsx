@@ -13,6 +13,8 @@ export default function TemplatesPage() {
     { id: 'modern', name: 'Modern Template', description: 'Clean layout with blue accents, best for tech and IT roles.' },
     { id: 'professional', name: 'Professional Template', description: 'Traditional structured layout, ideal for corporate jobs.' },
     { id: 'creative', name: 'Creative Template', description: 'Standout design with bold headers for design and creative fields.' },
+    { id: 'minimalist', name: 'Minimalist Template', description: 'Simple and clean typography-focused layout.' },
+    { id: 'compact', name: 'Compact Template', description: 'Space-saving single-page layout for concise content.' },
   ];
 
   const handleSelectTemplate = (templateId: string) => {

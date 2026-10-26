@@ -11,7 +11,8 @@ import { SkillsSection } from '@/components/editor/SkillsSection';
 import { ProjectsSection } from '@/components/editor/ProjectSection';
 import { LivePreview } from '@/components/preview/LivePreview';
 import { useResumeStore, AVAILABLE_TEMPLATES } from '@/store/useResumeStore';
-import { calculateATSScore } from '@/lib/atsChecker';
+import { calculateATSScore, ATSResult } from '@/lib/atsChecker';
+import { ATSScoreModal } from '@/components/editor/ATSScoreModal';
 
 export default function BuilderPage() {
   const router = useRouter();
@@ -19,21 +20,24 @@ export default function BuilderPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
+  // 🎯 ATS Modal States
+  const [atsResult, setAtsResult] = useState<ATSResult | null>(null);
+  const [isAtsModalOpen, setIsAtsModalOpen] = useState<boolean>(false);
+
   const personalInfo = resumeData?.personalInfo || {};
 
   useEffect(() => {
     async function checkUser() {
       setLoadingUser(true);
-      resetResume();
-
+      
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         router.replace('/login');
       } else {
         setUserId(session.user.id);
         await loadUserResume(session.user.id);
+        setLoadingUser(false);
       }
-      setLoadingUser(false);
     }
     checkUser();
   }, [router]);
@@ -82,6 +86,7 @@ export default function BuilderPage() {
     }
   };
 
+  // 🎯 Updated ATS Checker Handler (Replaced alert with Modal Trigger)
   const handleCheckATS = () => {
     const jobDescription = prompt(
       "Paste Job Description (JD) here for Keyword Matching:\n(Or leave blank for format/completeness check only)"
@@ -89,16 +94,9 @@ export default function BuilderPage() {
 
     const result = calculateATSScore(resumeData, jobDescription);
 
-    let matchInfo = '';
-    if (jobDescription.trim() !== '') {
-      matchInfo = `\n\n🎯 Matched Keywords (${result.matchedKeywords.length}): ${result.matchedKeywords.slice(0, 5).join(', ')}\n❌ Missing Keywords (${result.missingKeywords.length}): ${result.missingKeywords.slice(0, 5).join(', ')}`;
-    }
-
-    const suggestionsText = result.suggestions.length > 0 
-      ? result.suggestions.map((s, i) => `${i + 1}. ${s}`).join('\n')
-      : "Great job! Your resume looks fully optimized for ATS.";
-    
-    alert(`📊 ATS Compatibility Score: ${result.score}/100${matchInfo}\n\n💡 Suggestions:\n${suggestionsText}`);
+    // Set Result & Open Modal Dashboard
+    setAtsResult(result);
+    setIsAtsModalOpen(true);
   };
 
   const handleDownloadPDF = () => {
@@ -106,8 +104,6 @@ export default function BuilderPage() {
   };
 
   const loadUserResume = async (currentUserId: string) => {
-    resetResume();
-
     try {
       const { data, error } = await supabase
         .from('resumes')
@@ -117,14 +113,12 @@ export default function BuilderPage() {
 
       if (error || !data || !data.full_data) {
         console.log("No existing resume found for this user, starting fresh.");
-        resetResume();
         return;
       }
 
       setResumeData(data.full_data);
     } catch (error) {
       console.error("Error loading resume:", error);
-      resetResume();
     }
   };
 
@@ -269,6 +263,13 @@ export default function BuilderPage() {
           <LivePreview />
         </div>
       </div>
+
+      {/* 🎯 ATS Score Modal Dashboard */}
+      <ATSScoreModal 
+        isOpen={isAtsModalOpen} 
+        onClose={() => setIsAtsModalOpen(false)} 
+        result={atsResult} 
+      />
     </div>
-  )
+  );
 }

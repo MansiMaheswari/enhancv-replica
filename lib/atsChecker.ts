@@ -1,9 +1,24 @@
 export interface ATSResult {
   score: number;
+  keywordsMatchScore: number;
+  jobTitleMatchScore: number;
+  qualificationsMatchScore: number;
+  responsibilitiesMatchScore: number;
   matchedKeywords: string[];
   missingKeywords: string[];
   suggestions: string[];
 }
+
+// Common Stop Words to ignore in ATS Keyword Matching
+const STOP_WORDS = new Set([
+  'a', 'an', 'the', 'and', 'or', 'but', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+  'in', 'on', 'at', 'to', 'for', 'with', 'by', 'about', 'against', 'between', 'into', 'through',
+  'during', 'before', 'after', 'above', 'below', 'from', 'up', 'down', 'of', 'off', 'over', 'under',
+  'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any',
+  'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own',
+  'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', 'should', 'now',
+  'looking', 'requirement', 'using', 'used', 'we', 'you', 'your', 'our', 'have', 'has', 'had'
+]);
 
 // Valid Technical & Professional Skills Dictionary for Validation
 const VALID_SKILLS_DICTIONARY = new Set([
@@ -17,6 +32,10 @@ export function calculateATSScore(resumeData: any, jobDescription: string = ''):
   if (!resumeData) {
     return {
       score: 0,
+      keywordsMatchScore: 0,
+      jobTitleMatchScore: 0,
+      qualificationsMatchScore: 0,
+      responsibilitiesMatchScore: 0,
       matchedKeywords: [],
       missingKeywords: [],
       suggestions: ['Please provide resume data to analyze.'],
@@ -35,96 +54,97 @@ export function calculateATSScore(resumeData: any, jobDescription: string = ''):
   const experienceText: string = experience.map((e: any) => `${e.position || ''} ${e.company || ''} ${e.description || ''}`).join(' ');
   const projectsText: string = projects.map((p: any) => `${p.title || ''} ${p.technologies || ''} ${p.description || ''}`).join(' ');
 
-  const fullResumeText = `${personalInfo.fullName || ''} ${personalInfo.jobTitle || ''} ${personalInfo.email || ''} ${personalInfo.phone || ''} ${personalInfo.location || ''} ${summary} ${skillsText} ${experienceText} ${projectsText}`.toLowerCase();
+  const fullResumeText = `${personalInfo.fullName || ''} ${personalInfo.jobTitle || ''} ${personalInfo.email || ''} ${personalInfo.phone || ''} ${personalInfo.location || ''} ${personalInfo.linkedin || ''} ${summary} ${skillsText} ${experienceText} ${projectsText}`.toLowerCase();
 
+  // Comprehensive Structural Checks
+  const getStructuralChecks = () => {
+    let penalty = 0;
+    const commonSuggestions: string[] = [];
+
+    if (!personalInfo.fullName || personalInfo.fullName.trim() === '' || personalInfo.fullName === 'Your Full Name') {
+      penalty += 10;
+      commonSuggestions.push('Add your Full Name in Personal Info.');
+    }
+
+    if (!personalInfo.jobTitle || personalInfo.jobTitle.trim() === '') {
+      penalty += 15;
+      commonSuggestions.push('Job Title is missing! Add your target role in Personal Info.');
+    }
+
+    if (!personalInfo.email || personalInfo.email.trim() === '' || personalInfo.email === 'email@example.com') {
+      penalty += 10;
+      commonSuggestions.push('Add a valid Email address.');
+    }
+
+    if (!personalInfo.phone || personalInfo.phone.trim() === '') {
+      penalty += 10;
+      commonSuggestions.push('Phone number is missing! Add your contact number.');
+    }
+
+    if (!personalInfo.location || personalInfo.location.trim() === '') {
+      penalty += 5;
+      commonSuggestions.push('Location is missing! Add your city/location.');
+    }
+
+    if (!personalInfo.linkedin || personalInfo.linkedin.trim() === '') {
+      penalty += 5;
+      commonSuggestions.push('LinkedIn URL is missing! Add your professional profile link.');
+    }
+
+    if (!summary || summary.trim() === '') {
+      penalty += 10;
+      commonSuggestions.push('Add a professional summary to improve keyword matching.');
+    }
+
+    if (!education.length || !education.some((e: any) => e.degree && e.institution)) {
+      penalty += 10;
+      commonSuggestions.push('Add your Education details (Degree and Institution).');
+    }
+
+    if (skills.length < 3) {
+      penalty += 10;
+      commonSuggestions.push('Add at least 3 relevant technical skills.');
+    }
+
+    if (!projects.length || !projects.some((p: any) => p.title && p.title.trim() !== '')) {
+      penalty += 10;
+      commonSuggestions.push('Add at least one Project with a title and description.');
+    }
+
+    return { penalty, commonSuggestions };
+  };
+
+  // Sub-scores calculation for UI Cards
+  const jobTitleMatchScore = personalInfo.jobTitle && personalInfo.jobTitle.trim() !== '' ? 100 : 0;
+  const qualificationsMatchScore = education.length > 0 && skills.length >= 3 ? 100 : 50;
+  const responsibilitiesMatchScore = experience.length > 0 || projects.length > 0 ? 100 : 40;
+
+  // MODE 1: Blank Job Description Mode
   if (!jobDescription.trim()) {
-    let score = 10;
-    const suggestions: string[] = [];
-
-    if (personalInfo.fullName && personalInfo.fullName.trim() !== '' && personalInfo.fullName !== 'Your Full Name') {
-      score += 8;
-    } else {
-      suggestions.push('Add your Full Name in Personal Information.');
-    }
-
-    if (personalInfo.jobTitle && personalInfo.jobTitle.trim() !== '') {
-      score += 8;
-    } else {
-      suggestions.push('Add your Job Title / Professional Role.');
-    }
-
-    if (personalInfo.email && personalInfo.email.trim() !== '' && personalInfo.email !== 'email@example.com') {
-      score += 8;
-    } else {
-      suggestions.push('Add your valid Email address.');
-    }
-
-    if (summary.trim() !== '') {
-      score += 10;
-    } else {
-      suggestions.push('Add a professional summary.');
-    }
-
-    if (education.length > 0 && education.some((e: any) => e.degree && e.institution)) {
-      score += 10;
-    } else {
-      suggestions.push('Add your education details (Degree and Institution).');
-    }
-
-    if (experience.length > 0 && experience.some((ex: any) => ex.position && ex.company)) {
-      score += 10;
-    } else {
-      suggestions.push('Add at least one work experience (Position and Company).');
-    }
-
-    // Skills Validation Check
-    if (skills.length >= 3) {
-      // Check for invalid/meaningless skills
-      const invalidSkills = skillsList.filter(sk => sk.trim().length > 0 && !VALID_SKILLS_DICTIONARY.has(sk.toLowerCase().trim()));
-      if (invalidSkills.length > 0) {
-        score += 5; // Partial score penalty
-        suggestions.push(`Review skills: [ ${invalidSkills.join(', ')} ] look like invalid or non-standard technical keywords.`);
-      } else {
-        score += 10;
-      }
-    } else {
-      suggestions.push('Add at least 3 relevant technical skills.');
-    }
-
-    if (projects.length > 0 && projects.some((p: any) => p.title && p.title.trim() !== '')) {
-      score += 9;
-    } else {
-      suggestions.push('Add a Project Title.');
-    }
-
-    if (projects.length > 0 && projects.some((p: any) => p.technologies && p.technologies.trim() !== '')) {
-      score += 9;
-    } else {
-      suggestions.push('Add technologies used in your Projects.');
-    }
-
-    if (projects.length > 0 && projects.some((p: any) => p.description && p.description.trim() !== '')) {
-      score += 10;
-    } else {
-      suggestions.push('Add a detailed description for your Projects.');
-    }
+    let score = 100;
+    const { penalty, commonSuggestions } = getStructuralChecks();
+    score = Math.max(0, score - penalty);
 
     return {
-      score: Math.min(score, 100),
+      score,
+      keywordsMatchScore: 100,
+      jobTitleMatchScore,
+      qualificationsMatchScore,
+      responsibilitiesMatchScore,
       matchedKeywords: [],
       missingKeywords: [],
-      suggestions: suggestions.length > 0 ? suggestions : ['Your resume structure is complete!'],
+      suggestions: commonSuggestions.length > 0 ? commonSuggestions : ['Your resume structure is complete!'],
     };
   }
 
-  // Job Description Mode matching
-  const jdKeywords: string[] = jobDescription
+  // MODE 2: Job Description Matching Mode
+  const rawJdKeywords: string[] = jobDescription
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, '')
     .split(/\s+/)
-    .filter((word: string) => word.length > 2);
+    .filter((word: string) => word.length > 2 && !STOP_WORDS.has(word));
 
-  const uniqueJdKeywords: string[] = Array.from(new Set(jdKeywords));
+  const uniqueJdKeywords: string[] = Array.from(new Set(rawJdKeywords));
   const matchedKeywords: string[] = [];
   const missingKeywords: string[] = [];
 
@@ -136,18 +156,36 @@ export function calculateATSScore(resumeData: any, jobDescription: string = ''):
     }
   });
 
-  const matchRatio = uniqueJdKeywords.length > 0 ? matchedKeywords.length / uniqueJdKeywords.length : 1;
-  const score = Math.round(matchRatio * 100);
+  const keywordsMatchScore = uniqueJdKeywords.length > 0 ? Math.round((matchedKeywords.length / uniqueJdKeywords.length) * 100) : 100;
+  let baseScore = keywordsMatchScore;
 
-  const suggestions: string[] = [];
+  // Apply Structural Deductions
+  const { penalty, commonSuggestions } = getStructuralChecks();
+  let finalScore = Math.max(0, baseScore - penalty);
+
+  const suggestions: string[] = [...commonSuggestions];
+
+  // Short JD Penalty
+  if (uniqueJdKeywords.length < 5) {
+    finalScore = Math.min(finalScore, 70);
+    suggestions.push('Job Description is too short for complete analysis. Score is capped at 70/100.');
+  }
+
+  // Missing Keywords Suggestion
   if (missingKeywords.length > 0) {
     suggestions.push(`Missing JD keywords: Consider adding [ ${missingKeywords.slice(0, 5).join(', ')} ] to your resume.`);
-  } else {
-    suggestions.push('Great job! Your resume matches the requirements.');
+  }
+
+  if (suggestions.length === 0) {
+    suggestions.push('Great job! Your resume matches the job requirements perfectly.');
   }
 
   return {
-    score,
+    score: finalScore,
+    keywordsMatchScore,
+    jobTitleMatchScore,
+    qualificationsMatchScore,
+    responsibilitiesMatchScore,
     matchedKeywords,
     missingKeywords,
     suggestions,
