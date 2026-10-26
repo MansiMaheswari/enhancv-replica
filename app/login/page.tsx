@@ -50,7 +50,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen w-full bg-slate-900 font-sans text-slate-100">
       
-      {/* 👈 LEFT PANEL: Dark Branding & Testimonials Section */}
+      {/* LEFT PANEL: Dark Branding & Testimonials Section */}
       <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-12 border-r border-slate-800/60 relative overflow-hidden">
         
         {/* Glow Effects */}
@@ -146,7 +146,7 @@ export default function LoginPage() {
       </div>
 
 
-      {/* 👉 RIGHT PANEL: White Clean Form Section */}
+      {/*  RIGHT PANEL: White Clean Form Section */}
       <div className="flex w-full lg:w-1/2 flex-col justify-between bg-white px-6 py-8 sm:px-12 lg:px-16 text-slate-800">
         
         {/* Top Header Sign-in Switcher */}

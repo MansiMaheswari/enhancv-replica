@@ -20,7 +20,7 @@ export default function BuilderPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
-  // 🎯 ATS Modal States
+  // ATS Modal States
   const [atsResult, setAtsResult] = useState<ATSResult | null>(null);
   const [isAtsModalOpen, setIsAtsModalOpen] = useState<boolean>(false);
 
@@ -86,7 +86,7 @@ export default function BuilderPage() {
     }
   };
 
-  // 🎯 Updated ATS Checker Handler (Replaced alert with Modal Trigger)
+  // Updated ATS Checker Handler 
   const handleCheckATS = () => {
     const jobDescription = prompt(
       "Paste Job Description (JD) here for Keyword Matching:\n(Or leave blank for format/completeness check only)"
@@ -264,7 +264,7 @@ export default function BuilderPage() {
         </div>
       </div>
 
-      {/* 🎯 ATS Score Modal Dashboard */}
+      {/*  ATS Score Modal Dashboard */}
       <ATSScoreModal 
         isOpen={isAtsModalOpen} 
         onClose={() => setIsAtsModalOpen(false)} 

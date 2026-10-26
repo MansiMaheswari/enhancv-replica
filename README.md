@@ -11,13 +11,14 @@ A professional, full-stack resume builder web application built with Next.js, Ty
   * **Input Validation**: Robust frontend and backend checks to ensure users enter valid text before invoking AI generation.
   * Modal preview workflow allowing users to review and apply enhancements seamlessly with a single click.
 * **Live Resume Preview**: Real-time synchronization of all inputs onto professional resume templates.
-* **ATS Score Checker**: Evaluates resume completeness and keyword optimization to help users pass Applicant Tracking Systems.
-* **PDF Export**: Export generated resumes directly into professional PDF formats.
-* **Authentication & Persistence**: Secure user authentication and cloud persistence powered by **Supabase**, allowing users to save and load their resume data anytime.
+* **ATS Score Checker**: Evaluates resume completeness, keyword optimization, job title/qualifications match, and provides instant improvement suggestions to help users pass Applicant Tracking Systems.
+* **PDF Export**: Export generated resumes directly into professional PDF formats using browser-native printing (`window.print()`).
+* **Authentication & Persistence**: Secure user authentication (Login/Signup flow via Supabase) and cloud persistence, allowing users to save and load their resume data securely anytime.
+* **Smart Routing**: Default root URL (`/`) automatically redirects visitors to the secure login/signup interface.
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
-* **Frontend**: Next.js, React, TypeScript, Tailwind CSS
+* **Frontend**: Next.js (App Router), React, TypeScript, Tailwind CSS
 * **State Management**: Zustand
 * **AI Integration**: Google Gemini API with fallback handling
 * **Database & Auth**: Supabase
@@ -29,7 +30,11 @@ A professional, full-stack resume builder web application built with Next.js, Ty
 enhancv-replica/
 ├── app/                  # Next.js App Router (pages, API routes)
 │   ├── api/              # Backend endpoints (Gemini AI content generation)
-│   └── builder/          # Main resume builder workspace
+│   ├── builder/          # Main resume builder workspace
+│   ├── login/            # User authentication (Sign In)
+│   ├── signup/           # User registration (Sign Up)
+│   ├── page.tsx          # Root server-side redirect to /login
+│   └── layout.tsx        # Global application layout
 ├── components/           # Modular React components
 │   ├── editor/           # Summary, Experience, Project, Skills sections
 │   └── preview/          # Live resume templates & preview rendering
